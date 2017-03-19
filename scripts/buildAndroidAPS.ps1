@@ -26,6 +26,7 @@ $parentFolder = (get-item $scriptroot ).parent.FullName
 $aapsFolder = "$parentFolder\AndroidAPS"
 $apkFolder = "$aapsFolder\app\build\outputs\apk"
 $gradlewPath = "$aapsFolder\gradlew.bat"
+$androidSDK = "$Env:ANDROID_HOME"
 
 ###############Menu functions########################
 function DrawMenu {
@@ -77,7 +78,7 @@ function Menu {
 ###############Menus and submenus########################
 
 function MainMenu {
-$options = "Install Git","Install Jdk","Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk","Install Android Studio (Optional)","Clone AAPS to $aapsFolder","Switch to master Branch","Switch to dev Branch","Build","-Exit-"
+$options = "Install Git","Install Jdk","Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk","Install Android Studio (Optional)","Clone AAPS to $aapsFolder","Switch to master Branch","Switch to dev Branch","Build","Generate key for signing","Sign APKs in $apkFolder","-Exit-"
 	$selection = Menu $options "Build AndroidAPS"
 	Switch ($selection) {
 		"Install Git" {.$scriptroot\installGit.ps1;anykey;MainMenu}
@@ -95,6 +96,8 @@ $options = "Install Git","Install Jdk","Install Android SDK to $Env:USERPROFILE\
 		git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder  fetch mainRepo
 		git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder reset --hard mainRepo/dev;anykey;MainMenu}
 		"Build" {buildaaps}
+		"Generate key for signing" {keytool -genkey -v -keystore $parentFolder\aaps-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias aaps-key;anykey;MainMenu}
+		"Sign APKs in $apkFolder" {signAPK;anykey;MainMenu}
 		"-Exit-" {Exit}
 	}
 }
@@ -113,29 +116,40 @@ MainMenu
 $options = "Full","NSClient","Openloop","Pumpcontrol","-Main Menu-","-Exit-"
 	$selection = Menu $options "Build AndroidAPS"
 	Switch ($selection) {
-		"Full" {$flavor = "Full";assembly;anykey;MainMenu}
-		"NSClient" {$flavor = "NSClient";assembly;anykey;MainMenu}
-		"Openloop" {$flavor = "Openloop";assembly;anykey;MainMenu}
-		"Pumpcontrol" {$flavor = "Pumpcontrol";assembly;anykey;MainMenu}
+		"Full" {$flavor = "Full";buildType;anykey;MainMenu}
+		"NSClient" {$flavor = "NSClient";buildType;anykey;MainMenu}
+		"Openloop" {$flavor = "Openloop";buildType;anykey;MainMenu}
+		"Pumpcontrol" {$flavor = "Pumpcontrol";buildType;anykey;MainMenu}
 		"-Main Menu-" {MainMenu}
 		"-Exit-" {Exit}
 	}
 }
 
-function assembly {
+function buildType {
+$options = "Debug","Release","-Main Menu-","-Exit-"
+	$selection = Menu $options "Select Wear Options!"
+	Switch ($selection) {
+		"Debug" {$type= "Debug";assemble}
+		"Release" {$type = "Release";assemble}
+		"-Main Menu-" {MainMenu}
+		"-Exit-" {Exit}
+	}
+}
+
+function assemble {
 $options = "Nowear","Wear","Wearcontrol","-Main Menu-","-Exit-"
 	$selection = Menu $options "Select Wear Options!"
 	Switch ($selection) {
 		"Nowear" {
-		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Nowear"
+		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Nowear`"$type`""
 		cmd.exe /C "`"$gradlewPath`" --stop"
 		if (Test-Path $apkFolder) { explorer $apkFolder}}
 		"Wear" {
-		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Wear"
+		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Wear`"$type`""
 		cmd.exe /C "`"$gradlewPath`" --stop"
 		if (Test-Path $apkFolder) { explorer $apkFolder}}
 		"Wearcontrol" {
-		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Wearcontrol"
+		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Wearcontrol`"$type`""
 		cmd.exe /C "`"$gradlewPath`" --stop" 		
 		if (Test-Path $apkFolder) { explorer $apkFolder}}
 		"-Main Menu-" {MainMenu}
@@ -173,8 +187,28 @@ $data | ConvertTo-SecureString -key $key |
 ForEach-Object {[Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($_))}
 }
 
+function signAPK {
+$buildTools = (gci $androidSDK\build-tools\ | sort LastWriteTime | select -last 1).FullName
+Get-ChildItem $apkFolder -Filter *unsigned.apk | 
+	Foreach-Object {
+		write-host "======================================================"
+		write-host "Signing $_"
+		write-host "======================================================"
+		write-host ""
+		write-host ""
+		$basename = $_.BaseName
+		$signedName = $basename.Replace("unsigned","signed")
+		& $buildtools\zipalign.exe -p 4 $_.FullName $apkFolder\$basename-aligned.apk
+		write-host "---------"
+		& $buildtools\apksigner.bat sign --verbose --ks $parentFolder\aaps-release-key.jks --out $apkFolder\$signedName.apk $apkFolder\$basename-aligned.apk
+		write-host "---------"
+		& $buildtools\apksigner.bat verify $apkFolder\$signedName.apk			
+		write-host "Signing of $signedName.apk complete"
+		If (Test-Path $apkFolder\$basename-aligned.apk){Remove-Item $apkFolder\$basename-aligned.apk}
+		write-host ""
+		write-host ""
+	}
+}
+
 #call MainMenu
 MainMenu
-
-
-
