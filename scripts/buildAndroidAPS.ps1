@@ -242,6 +242,7 @@ function disclaimer {
 }
 
 #call MainMenu
+cls
 disclaimer
 anykey
 MainMenu
