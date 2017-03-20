@@ -143,15 +143,15 @@ $options = "Nowear","Wear","Wearcontrol","-Main Menu-","-Exit-"
 		"Nowear" {
 		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Nowear`"$type`""
 		cmd.exe /C "`"$gradlewPath`" --stop"
-		if (Test-Path $apkFolder) { explorer $apkFolder}}
+		copyDebugApk}
 		"Wear" {
 		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Wear`"$type`""
 		cmd.exe /C "`"$gradlewPath`" --stop"
-		if (Test-Path $apkFolder) { explorer $apkFolder}}
+		copyDebugApk}
 		"Wearcontrol" {
 		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Wearcontrol`"$type`""
 		cmd.exe /C "`"$gradlewPath`" --stop" 		
-		if (Test-Path $apkFolder) { explorer $apkFolder}}
+		copyDebugApk}
 		"-Main Menu-" {MainMenu}
 		"-Exit-" {Exit}
 	}
@@ -160,6 +160,17 @@ $options = "Nowear","Wear","Wearcontrol","-Main Menu-","-Exit-"
 function anykey {
 Write-Host "Press Any Key To Continue... " 
 $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+}
+
+function copyDebugApk {
+Get-ChildItem $apkFolder -Filter *debug.apk | Foreach-Object {
+		$fullname = $_.FullName
+		write-host "======================================================"
+		write-host "copy $_ to"
+		write-host "$parentFolder\apk\"
+		write-host "======================================================"
+		Copy-Item "$fullname" -Destination (New-Item "$parentFolder\apk\" -Type container -Force) -Force
+		}
 }
 
 function Set-Key {
