@@ -78,7 +78,7 @@ function Menu {
 ###############Menus and submenus########################
 
 function MainMenu {
-$options = "Install Git","Install Jdk","Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk","Install Android Studio (Optional)","Clone AAPS to $aapsFolder","Switch to master Branch","Switch to dev Branch","Build","Generate key for signing","Sign APKs in $apkFolder","-Exit-"
+$options = "Install Git","Install Jdk","Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk","Install Android Studio (Optional)","Clone AAPS to $aapsFolder","Switch to master Branch","Switch to dev Branch","Build","Generate key for signing","Sign APKs and copy to $parentFolder\apk","-Exit-"
 	$selection = Menu $options "Build AndroidAPS"
 	Switch ($selection) {
 		"Install Git" {.$scriptroot\installGit.ps1;anykey;MainMenu}
@@ -97,7 +97,7 @@ $options = "Install Git","Install Jdk","Install Android SDK to $Env:USERPROFILE\
 		git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder reset --hard mainRepo/dev;anykey;MainMenu}
 		"Build" {buildaaps}
 		"Generate key for signing" {keytool -genkey -v -keystore $parentFolder\aaps-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias aaps-key;anykey;MainMenu}
-		"Sign APKs in $apkFolder" {signAPK;anykey;MainMenu}
+		"Sign APKs and copy to $parentFolder\apk" {signAPK;anykey;MainMenu}
 		"-Exit-" {Exit}
 	}
 }
@@ -205,6 +205,7 @@ Get-ChildItem $apkFolder -Filter *unsigned.apk |
 		& $buildtools\apksigner.bat verify $apkFolder\$signedName.apk			
 		write-host "Signing of $signedName.apk complete"
 		If (Test-Path $apkFolder\$basename-aligned.apk){Remove-Item $apkFolder\$basename-aligned.apk}
+		Copy-Item "$apkFolder\$signedName.apk" -Destination (New-Item "$parentFolder\apk\" -Type container -Force) -Force
 		write-host ""
 		write-host ""
 	}
