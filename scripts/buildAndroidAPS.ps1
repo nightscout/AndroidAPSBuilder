@@ -81,24 +81,27 @@ function MainMenu {
 $options = "Install Git","Install Jdk","Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk","Install Android Studio (Optional)","Clone AAPS to $aapsFolder","Switch to master Branch","Switch to dev Branch","Build","Generate key for signing","Sign APKs and copy to $parentFolder\apk","Install APK","-Exit-"
 	$selection = Menu $options "Build AndroidAPS"
 	Switch ($selection) {
-		"Install Git" {.$scriptroot\installGit.ps1;anykey;MainMenu}
-		"Install Jdk" {.$scriptroot\installJdk.ps1;anykey;MainMenu}
-		"Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk" {.$scriptroot\installAndroidSDK.ps1;anykey;MainMenu}
-		"Install Android Studio (Optional)" {.$scriptroot\installAndroidStudio.ps1;anykey;MainMenu}
+		"Install Git" {cls;.$scriptroot\installGit.ps1;anykey;MainMenu}
+		"Install Jdk" {cls;.$scriptroot\installJdk.ps1;anykey;MainMenu}
+		"Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk" {cls;.$scriptroot\installAndroidSDK.ps1;anykey;MainMenu}
+		"Install Android Studio (Optional)" {cls;.$scriptroot\installAndroidStudio.ps1;anykey;MainMenu}
 		"Clone AAPS to $aapsFolder" {
+		cls
 		git clone https://github.com/MilosKozak/AndroidAPS.git $aapsFolder
 		git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder remote add mainRepo git://github.com/MilosKozak/AndroidAPS.git
 		;anykey;MainMenu}
 		"Switch to master Branch" {
+		cls
 		git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder  fetch mainRepo
 		git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder reset --hard mainRepo/master;anykey;MainMenu}		
 		"Switch to dev Branch" {
+		cls
 		git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder  fetch mainRepo
 		git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder reset --hard mainRepo/dev;anykey;MainMenu}
 		"Build" {buildaaps}
-		"Generate key for signing" {keytool -genkey -v -keystore $parentFolder\aaps-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias aaps-key;anykey;MainMenu}
-		"Sign APKs and copy to $parentFolder\apk" {signAPK;anykey;MainMenu}
-		"Install APK" {.$scriptroot\ADB.ps1;anykey;MainMenu}
+		"Generate key for signing" {cls;keytool -genkey -v -keystore $parentFolder\aaps-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias aaps-key;anykey;MainMenu}
+		"Sign APKs and copy to $parentFolder\apk" {cls;signAPK;anykey;MainMenu}
+		"Install APK" {cls;.$scriptroot\ADB.ps1;anykey;MainMenu}
 		"-Exit-" {Exit}
 	}
 }
@@ -206,7 +209,6 @@ Get-ChildItem $apkFolder -Filter *unsigned.apk |
 		write-host "======================================================"
 		write-host "Signing $_"
 		write-host "======================================================"
-		write-host ""
 		write-host ""
 		$basename = $_.BaseName
 		$signedName = $basename.Replace("unsigned","signed")
