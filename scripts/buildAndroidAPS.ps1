@@ -78,7 +78,7 @@ function Menu {
 ###############Menus and submenus########################
 
 function MainMenu {
-$options = "Install Git","Install Jdk","Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk","Install Android Studio (Optional)","Clone AAPS to $aapsFolder","Switch to master Branch","Switch to dev Branch","Build","Generate key for signing","Sign APKs and copy to $parentFolder\apk","Install APK","-Exit-"
+$options = "Install Git","Install Jdk","Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk","Install Android Studio (Optional)","Clone AAPS to $aapsFolder","Switch to master Branch","Switch to dev Branch","Build","Generate key for signing","Sign APKs","Install APK","-Exit-"
 	$selection = Menu $options "Build AndroidAPS"
 	Switch ($selection) {
 		"Install Git" {cls;.$scriptroot\installGit.ps1;anykey;MainMenu}
@@ -100,7 +100,7 @@ $options = "Install Git","Install Jdk","Install Android SDK to $Env:USERPROFILE\
 		git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder reset --hard mainRepo/dev;anykey;MainMenu}
 		"Build" {buildaaps}
 		"Generate key for signing" {cls;keytool -genkey -v -keystore $parentFolder\aaps-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias aaps-key;anykey;MainMenu}
-		"Sign APKs and copy to $parentFolder\apk" {cls;signAPK;anykey;MainMenu}
+		"Sign APKs" {cls;signAPK;anykey;MainMenu}
 		"Install APK" {cls;.$scriptroot\ADB.ps1;anykey;MainMenu}
 		"-Exit-" {Exit}
 	}
@@ -147,15 +147,15 @@ $options = "Nowear","Wear","Wearcontrol","-Main Menu-","-Exit-"
 		"Nowear" {
 		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Nowear`"$type`""
 		cmd.exe /C "`"$gradlewPath`" --stop"
-		copyDebugApk}
+		copyApk}
 		"Wear" {
 		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Wear`"$type`""
 		cmd.exe /C "`"$gradlewPath`" --stop"
-		copyDebugApk}
+		copyApk}
 		"Wearcontrol" {
 		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Wearcontrol`"$type`""
 		cmd.exe /C "`"$gradlewPath`" --stop" 		
-		copyDebugApk}
+		copyApk}
 		"-Main Menu-" {MainMenu}
 		"-Exit-" {Exit}
 	}
@@ -166,16 +166,16 @@ Write-Host "Press Any Key To Continue... "
 $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 }
 
-function copyDebugApk {
-Get-ChildItem $apkFolder -Filter *debug.apk | Foreach-Object {
+function copyApk {
+Get-ChildItem $apkFolder -Filter *.apk | Foreach-Object {
 		$fullname = $_.FullName
 		write-host "======================================================"
 		write-host "copy $_ to"
 		write-host "$parentFolder\apk\"
 		write-host "======================================================"
 		Copy-Item "$fullname" -Destination (New-Item "$parentFolder\apk\" -Type container -Force) -Force
-		Get-ChildItem $apkFolder -Filter *debug.apk | Remove-Item
 		}
+Get-ChildItem $apkFolder -Filter *.apk | Remove-Item
 }
 
 function Set-Key {
@@ -205,7 +205,8 @@ ForEach-Object {[Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.Inte
 
 function signAPK {
 $buildTools = (gci $androidSDK\build-tools\ | sort LastWriteTime | select -last 1).FullName
-Get-ChildItem $apkFolder -Filter *unsigned.apk | 
+$keystorepw = read-host "Keystore password"
+Get-ChildItem $parentFolder\apk -Filter *unsigned.apk | 
 	Foreach-Object {
 		write-host "======================================================"
 		write-host "Signing $_"
@@ -213,20 +214,40 @@ Get-ChildItem $apkFolder -Filter *unsigned.apk |
 		write-host ""
 		$basename = $_.BaseName
 		$signedName = $basename.Replace("unsigned","signed")
-		& $buildtools\zipalign.exe -p 4 $_.FullName $apkFolder\$basename-aligned.apk
+		& $buildtools\zipalign.exe -p 4 $_.FullName $parentFolder\apk\$basename-aligned.apk
 		write-host "---------"
-		& $buildtools\apksigner.bat sign --verbose --ks $parentFolder\aaps-release-key.jks --out $apkFolder\$signedName.apk $apkFolder\$basename-aligned.apk
+				& $buildtools\apksigner.bat sign --ks $parentFolder\aaps-release-key.jks --ks-pass pass:$keystorepw --out $parentFolder\apk\$signedName.apk $parentFolder\apk\$basename-aligned.apk | out-string
 		write-host "---------"
-		& $buildtools\apksigner.bat verify $apkFolder\$signedName.apk			
+		& $buildtools\apksigner.bat verify $parentFolder\apk\$signedName.apk			
 		write-host "Signing of $signedName.apk complete"
-		Copy-Item "$apkFolder\$signedName.apk" -Destination (New-Item "$parentFolder\apk\" -Type container -Force) -Force
 		write-host ""
 		write-host ""
 	}
-	Get-ChildItem $apkFolder -Filter *signed.apk | Remove-Item
-	Get-ChildItem $apkFolder -Filter *unsigned.apk | Remove-Item
-	Get-ChildItem $apkFolder -Filter *aligned.apk | Remove-Item
+	
+Get-ChildItem $parentFolder\apk\ -Filter *debug.apk | 
+	Foreach-Object {
+		write-host "======================================================"
+		write-host "Signing $_"
+		write-host "======================================================"
+		write-host ""
+		$basename = $_.BaseName
+		$signedName = $basename.Replace("debug","debug-signed")
+		& $buildtools\zipalign.exe -p 4 $_.FullName $parentFolder\apk\$basename-aligned.apk
+		write-host "---------"
+		& $buildtools\apksigner.bat sign --ks $parentFolder\aaps-release-key.jks --ks-pass --out $parentFolder\apk\$signedName.apk $parentFolder\apk\$basename-aligned.apk
+		write-host "---------"
+		& $buildtools\apksigner.bat verify $parentFolder\apk\$signedName.apk			
+		write-host "Signing of $signedName.apk complete"
+		write-host ""
+		write-host ""
+	}
+	
+#Get-ChildItem $parentFolder\apk\ -Filter *debug.apk | Remove-Item
+#Get-ChildItem $parentFolder\apk\ -Filter *aligned.apk | Remove-Item
+#Get-ChildItem $parentFolder\apk\ -Filter *unsigned.apk | Remove-Item
 }
+
+
 
 function disclaimer {
 

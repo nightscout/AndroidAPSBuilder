@@ -52,11 +52,11 @@ $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 	Write-Host ""
 		
 	# If no device is connected 
-	if ("$serial" -eq "unknown") {
+	if ($serial -eq "unknown") {
 		Write-Host "Error: No device connected."
 		return
 	}
-	elseif ("$serial" -eq "error*") {
+	elseif ($serial -eq "error*") {
 		Write-Host "Error: No device connected."
 		return
 	} else {
@@ -78,6 +78,9 @@ $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 	write-host "======================================================================================================="
 	write-host "ATTENTION! if you installed AAPS as debug.apk and want to install release build then"
 	write-host "please make a settings Backup and then Uninstall it over 'Settings > Apps' otherwise install fails"
+	write-host ""
+	write-host "Or you can sign your debug.apk before installing with release key. look at the menu to do this"
+	Write-Host "Then you must not uninstall AAPS before."
 	write-host "======================================================================================================="
 	write-host ""
 	anykey
