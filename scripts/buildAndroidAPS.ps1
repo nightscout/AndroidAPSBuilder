@@ -219,10 +219,10 @@ Get-ChildItem $apkFolder -Filter *unsigned.apk |
 		write-host "---------"
 		& $buildtools\apksigner.bat verify $apkFolder\$signedName.apk			
 		write-host "Signing of $signedName.apk complete"
+		If (Test-Path $apkFolder\$basename-aligned.apk){Remove-Item $apkFolder\$basename-aligned.apk}
+		If (Test-Path $apkFolder\$basename-unsigned.apk){Remove-Item $apkFolder\$basename-unsigned.apk}
 		Copy-Item "$apkFolder\$signedName.apk" -Destination (New-Item "$parentFolder\apk\" -Type container -Force) -Force
-		Get-ChildItem $apkFolder -Filter *aligned.apk | Remove-Item
 		Get-ChildItem $apkFolder -Filter *signed.apk | Remove-Item
-		Get-ChildItem $apkFolder -Filter *unsigned.apk | Remove-Item
 		write-host ""
 		write-host ""
 	}
