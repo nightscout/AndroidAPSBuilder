@@ -174,6 +174,7 @@ Get-ChildItem $apkFolder -Filter *debug.apk | Foreach-Object {
 		write-host "$parentFolder\apk\"
 		write-host "======================================================"
 		Copy-Item "$fullname" -Destination (New-Item "$parentFolder\apk\" -Type container -Force) -Force
+		Remove-Item "$fullname"
 		}
 }
 
@@ -220,6 +221,8 @@ Get-ChildItem $apkFolder -Filter *unsigned.apk |
 		write-host "Signing of $signedName.apk complete"
 		If (Test-Path $apkFolder\$basename-aligned.apk){Remove-Item $apkFolder\$basename-aligned.apk}
 		Copy-Item "$apkFolder\$signedName.apk" -Destination (New-Item "$parentFolder\apk\" -Type container -Force) -Force
+		Remove-Item "$apkFolder\$signedName.apk"
+		Remove-Item $_.FullName
 		write-host ""
 		write-host ""
 	}
