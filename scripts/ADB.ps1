@@ -75,13 +75,13 @@ $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 	
 	# Uninstall but keep cache and data
 	write-host ""
-	write-host "======================================================================================================="
+	write-host "=========================================================================================================================================="
 	write-host "ATTENTION! if you installed AAPS as debug.apk and want to install release build then"
 	write-host "please make a settings Backup and then Uninstall it over 'Settings > Apps' otherwise install fails"
 	write-host ""
-	write-host "Or you can sign your debug.apk before installing with release key. look at the menu to do this"
+	write-host "Or you can sign your debug.apk (transfer:debug-release-signed.apk) before installing with release key. look at the menu to do this"
 	Write-Host "Then you must not uninstall AAPS before."
-	write-host "======================================================================================================="
+	write-host "=========================================================================================================================================="
 	write-host ""
 	anykey
 	

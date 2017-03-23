@@ -217,9 +217,17 @@ Get-ChildItem $parentFolder\apk -Filter *unsigned.apk |
 		$signedName = $basename.Replace("unsigned","signed")
 		& $buildtools\zipalign.exe -p 4 $_.FullName $parentFolder\apk\$basename-aligned.apk
 		write-host "---------"
-				& $buildtools\apksigner.bat sign --ks $parentFolder\aaps-release-key.jks --ks-pass pass:$keystorepw --out $parentFolder\apk\$signedName.apk $parentFolder\apk\$basename-aligned.apk | out-string
+		$jar = & $buildtools\apksigner.bat sign --verbose --ks $parentFolder\aaps-release-key.jks --ks-pass pass:$keystorepw --out $parentFolder\apk\$signedName.apk $parentFolder\apk\$basename-aligned.apk | Tee-Object -Variable jar 
+		<#
+		$jar = & jarsigner.exe -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore "$parentFolder\aaps-release-key.jks" -storepass "$keystorepw" -keypass "$keystorepw" -signedjar "$parentFolder\apk\$signedName.apk" "$parentFolder\apk\$basename-aligned.apk" aaps-key | Tee-Object -Variable jar
+		if ($jar -like "*you must enter key password*" -or $jar -like "*jarsigner error*") {
+		write-host $jar
+		anykey
+		MainMenu
+		}
+		#>
 		write-host "---------"
-		& $buildtools\apksigner.bat verify $parentFolder\apk\$signedName.apk			
+		& $buildtools\apksigner.bat verify -v $parentFolder\apk\$signedName.apk			
 		write-host "Signing of $signedName.apk complete"
 		write-host ""
 		write-host ""
@@ -232,19 +240,27 @@ Get-ChildItem $parentFolder\apk\ -Filter *debug.apk |
 		write-host "======================================================"
 		write-host ""
 		$basename = $_.BaseName
-		$signedName = $basename.Replace("debug","debug-signed")
+		$signedName = $basename.Replace("debug","debug-release-signed")
 		& $buildtools\zipalign.exe -p 4 $_.FullName $parentFolder\apk\$basename-aligned.apk
 		write-host "---------"
-		& $buildtools\apksigner.bat sign --ks $parentFolder\aaps-release-key.jks --ks-pass --out $parentFolder\apk\$signedName.apk $parentFolder\apk\$basename-aligned.apk
+		$jar = & $buildtools\apksigner.bat sign --verbose --ks $parentFolder\aaps-release-key.jks --ks-pass pass:$keystorepw --out $parentFolder\apk\$signedName.apk $parentFolder\apk\$basename-aligned.apk | Tee-Object -Variable jar 
+		<#
+		$jar = & jarsigner.exe -verbose -sigalg SHA1withRSA  -digestalg SHA1 -keystore "$parentFolder\aaps-release-key.jks" -storepass "$keystorepw" -keypass "$keystorepw" -signedjar "$parentFolder\apk\$signedName.apk" "$parentFolder\apk\$basename-aligned.apk" aaps-key | Tee-Object -Variable jar
+		if ($jar -like "*you must enter key password*" -or $jar -like "*jarsigner error*") {
+		write-host $jar
+		anykey
+		MainMenu
+		}
+		#>
 		write-host "---------"
-		& $buildtools\apksigner.bat verify $parentFolder\apk\$signedName.apk			
+		& $buildtools\apksigner.bat verify -v $parentFolder\apk\$signedName.apk			
 		write-host "Signing of $signedName.apk complete"
 		write-host ""
 		write-host ""
 	}
 	
 #Get-ChildItem $parentFolder\apk\ -Filter *debug.apk | Remove-Item
-#Get-ChildItem $parentFolder\apk\ -Filter *aligned.apk | Remove-Item
+Get-ChildItem $parentFolder\apk\ -Filter *aligned.apk | Remove-Item
 #Get-ChildItem $parentFolder\apk\ -Filter *unsigned.apk | Remove-Item
 }
 
