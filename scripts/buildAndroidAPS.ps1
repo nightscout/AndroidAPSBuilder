@@ -78,9 +78,10 @@ function Menu {
 ###############Menus and submenus########################
 
 function MainMenu {
-$options = "Install Git","Install Jdk","Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk","Install Android Studio (Optional)","Clone AAPS to $aapsFolder","Switch to master Branch","Switch to dev Branch","Build","Generate key for signing","Sign APKs","Install APK","-Exit-"
+$options = "First install Powershell 5 only for win 7/8/8.1","Install Git","Install Jdk","Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk","Install Android Studio (Optional)","Clone AAPS to $aapsFolder","Switch to master Branch","Switch to dev Branch","Build","Generate key for signing","Sign APKs","Install APK","-Exit-"
 	$selection = Menu $options "Build AndroidAPS"
 	Switch ($selection) {
+		"First install Powershell 5 only for win 7/8/8.1" {cls;Start-Process "$PSHome\PowerShell.exe" -Verb RunAs -ArgumentList " -ExecutionPolicy bypass  -file $scriptroot\installPowershell5.ps1" -Wait;anykey;Exit}
 		"Install Git" {cls;.$scriptroot\installGit.ps1;anykey;MainMenu}
 		"Install Jdk" {cls;.$scriptroot\installJdk.ps1;anykey;MainMenu}
 		"Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk" {cls;.$scriptroot\installAndroidSDK.ps1;anykey;MainMenu}
