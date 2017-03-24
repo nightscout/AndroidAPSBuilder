@@ -48,10 +48,10 @@ function DrawMenu {
 	for ($i = 0; $i -le $l;$i++) {
 		Write-Host -NoNewLine
 		if ($i -eq $menuPosition) {
-			Write-Host "$($menuItems[$i])" -fore $bcolor -back $fcolor
+			Write-Host "	$($menuItems[$i])" -fore $bcolor -back $fcolor
 		} 
 		else {
-			Write-Host "$($menuItems[$i])" -fore $fcolor -back $bcolor
+			Write-Host "	$($menuItems[$i])" -fore $fcolor -back $bcolor
 		}
 	}
 }
@@ -78,14 +78,14 @@ function Menu {
 ###############Menus and submenus########################
 
 function MainMenu {
-$options = "First install Powershell 5 only for win 7/8/8.1","Install Git","Install Jdk","Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk","Install Android Studio (Optional)","Clone AAPS to $aapsFolder","Switch to master Branch","Switch to dev Branch","Build","Generate key for signing","Sign APKs","Install APK","-Exit-"
+$options = "First install Powershell 5 only for win 7/8/8.1","Install Git","Install Jdk","Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk","Install Android Studio (Optional)`r`n","Clone AAPS to $aapsFolder","Switch to master Branch","Switch to dev Branch`r`n","Build","Generate key for signing","Sign APK's","Install APK`r`n","-Exit-"
 	$selection = Menu $options "Build AndroidAPS"
 	Switch ($selection) {
 		"First install Powershell 5 only for win 7/8/8.1" {cls;Start-Process "$PSHome\PowerShell.exe" -Verb RunAs -ArgumentList " -ExecutionPolicy bypass  -file $scriptroot\installPowershell5.ps1" -Wait;anykey;Exit}
 		"Install Git" {cls;.$scriptroot\installGit.ps1;anykey;MainMenu}
 		"Install Jdk" {cls;.$scriptroot\installJdk.ps1;anykey;MainMenu}
 		"Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk" {cls;.$scriptroot\installAndroidSDK.ps1;anykey;MainMenu}
-		"Install Android Studio (Optional)" {cls;.$scriptroot\installAndroidStudio.ps1;anykey;MainMenu}
+		"Install Android Studio (Optional)`r`n" {cls;.$scriptroot\installAndroidStudio.ps1;anykey;MainMenu}
 		"Clone AAPS to $aapsFolder" {
 		cls
 		git clone https://github.com/MilosKozak/AndroidAPS.git $aapsFolder
@@ -95,14 +95,14 @@ $options = "First install Powershell 5 only for win 7/8/8.1","Install Git","Inst
 		cls
 		git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder  fetch mainRepo
 		git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder reset --hard mainRepo/master;anykey;MainMenu}		
-		"Switch to dev Branch" {
+		"Switch to dev Branch`r`n" {
 		cls
 		git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder  fetch mainRepo
 		git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder reset --hard mainRepo/dev;anykey;MainMenu}
 		"Build" {buildaaps}
 		"Generate key for signing" {cls;keytool -genkey -v -keystore $parentFolder\aaps-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias aaps-key;anykey;MainMenu}
-		"Sign APKs" {cls;signAPK;anykey;MainMenu}
-		"Install APK" {cls;.$scriptroot\ADB.ps1;anykey;MainMenu}
+		"Sign APK's" {cls;signAPK;anykey;MainMenu}
+		"Install APK`r`n" {cls;.$scriptroot\ADB.ps1;anykey;MainMenu}
 		"-Exit-" {Exit}
 	}
 }
@@ -228,7 +228,7 @@ Get-ChildItem $parentFolder\apk -Filter *unsigned.apk |
 		$signedName = $basename.Replace("unsigned","signed")
 		& $buildtools\zipalign.exe -p 4 $_.FullName $parentFolder\apk\$basename-aligned.apk
 		write-host "---------"
-		$jar = & $buildtools\apksigner.bat sign --verbose --ks $parentFolder\aaps-release-key.jks --ks-pass pass:$keystorepw --out $parentFolder\apk\$signedName.apk $parentFolder\apk\$basename-aligned.apk | Tee-Object -Variable jar 
+		& $buildtools\apksigner.bat sign --verbose --ks $parentFolder\aaps-release-key.jks --ks-pass pass:$keystorepw --out $parentFolder\apk\$signedName.apk $parentFolder\apk\$basename-aligned.apk 
 		<#
 		$jar = & jarsigner.exe -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore "$parentFolder\aaps-release-key.jks" -storepass "$keystorepw" -keypass "$keystorepw" -signedjar "$parentFolder\apk\$signedName.apk" "$parentFolder\apk\$basename-aligned.apk" aaps-key | Tee-Object -Variable jar
 		if ($jar -like "*you must enter key password*" -or $jar -like "*jarsigner error*") {
@@ -254,7 +254,7 @@ Get-ChildItem $parentFolder\apk\ -Filter *debug.apk |
 		$signedName = $basename.Replace("debug","debug-release-signed")
 		& $buildtools\zipalign.exe -p 4 $_.FullName $parentFolder\apk\$basename-aligned.apk
 		write-host "---------"
-		$jar = & $buildtools\apksigner.bat sign --verbose --ks $parentFolder\aaps-release-key.jks --ks-pass pass:$keystorepw --out $parentFolder\apk\$signedName.apk $parentFolder\apk\$basename-aligned.apk | Tee-Object -Variable jar 
+		& $buildtools\apksigner.bat sign --verbose --ks $parentFolder\aaps-release-key.jks --ks-pass pass:$keystorepw --out $parentFolder\apk\$signedName.apk $parentFolder\apk\$basename-aligned.apk 
 		<#
 		$jar = & jarsigner.exe -verbose -sigalg SHA1withRSA  -digestalg SHA1 -keystore "$parentFolder\aaps-release-key.jks" -storepass "$keystorepw" -keypass "$keystorepw" -signedjar "$parentFolder\apk\$signedName.apk" "$parentFolder\apk\$basename-aligned.apk" aaps-key | Tee-Object -Variable jar
 		if ($jar -like "*you must enter key password*" -or $jar -like "*jarsigner error*") {
@@ -292,7 +292,7 @@ function disclaimer {
 	Their use is for information purposes and does not imply any affiliation with or endorsement by them.
 	Please note - this project has no association with and is not endorsed by:
 	SOOIL or Dexcom
-	"
+	" -foregroundcolor magenta
 }
 
 #call MainMenu
