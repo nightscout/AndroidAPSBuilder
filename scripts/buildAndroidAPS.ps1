@@ -148,15 +148,15 @@ $options = "Nowear","Wear","Wearcontrol","-Main Menu-","-Exit-"
 		"Nowear" {
 		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Nowear`"$type`""
 		cmd.exe /C "`"$gradlewPath`" --stop"
-		copyApk}
+		copyDebugApk}
 		"Wear" {
 		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Wear`"$type`""
 		cmd.exe /C "`"$gradlewPath`" --stop"
-		copyApk}
+		copyDebugApk}
 		"Wearcontrol" {
 		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Wearcontrol`"$type`""
 		cmd.exe /C "`"$gradlewPath`" --stop" 		
-		copyApk}
+		copyDebugApk}
 		"-Main Menu-" {MainMenu}
 		"-Exit-" {Exit}
 	}
@@ -165,6 +165,17 @@ $options = "Nowear","Wear","Wearcontrol","-Main Menu-","-Exit-"
 function anykey {
 Write-Host "Press Any Key To Continue... " 
 $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+}
+
+function copyDebugApk {
+Get-ChildItem $apkFolder -Filter *debug.apk | Foreach-Object {
+		$fullname = $_.FullName
+		write-host "======================================================"
+		write-host "copy $_ to"
+		write-host "$parentFolder\apk\"
+		write-host "======================================================"
+		Copy-Item "$fullname" -Destination (New-Item "$parentFolder\apk\" -Type container -Force) -Force
+		}
 }
 
 function copyApk {
@@ -176,7 +187,6 @@ Get-ChildItem $apkFolder -Filter *.apk | Foreach-Object {
 		write-host "======================================================"
 		Copy-Item "$fullname" -Destination (New-Item "$parentFolder\apk\" -Type container -Force) -Force
 		}
-Get-ChildItem $apkFolder -Filter *.apk | Remove-Item
 }
 
 function Set-Key {
@@ -207,6 +217,7 @@ ForEach-Object {[Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.Inte
 function signAPK {
 $buildTools = (gci $androidSDK\build-tools\ | sort LastWriteTime | select -last 1).FullName
 $keystorepw = read-host "Keystore password"
+copyApk
 Get-ChildItem $parentFolder\apk -Filter *unsigned.apk | 
 	Foreach-Object {
 		write-host "======================================================"
@@ -227,7 +238,7 @@ Get-ChildItem $parentFolder\apk -Filter *unsigned.apk |
 		}
 		#>
 		write-host "---------"
-		& $buildtools\apksigner.bat verify -v $parentFolder\apk\$signedName.apk			
+		& $buildtools\apksigner.bat verify -v $parentFolder\apk\$signedName.apk
 		write-host "Signing of $signedName.apk complete"
 		write-host ""
 		write-host ""
@@ -253,15 +264,15 @@ Get-ChildItem $parentFolder\apk\ -Filter *debug.apk |
 		}
 		#>
 		write-host "---------"
-		& $buildtools\apksigner.bat verify -v $parentFolder\apk\$signedName.apk			
+		& $buildtools\apksigner.bat verify -v -Werr $parentFolder\apk\$signedName.apk			
 		write-host "Signing of $signedName.apk complete"
 		write-host ""
 		write-host ""
 	}
 	
-#Get-ChildItem $parentFolder\apk\ -Filter *debug.apk | Remove-Item
+Get-ChildItem $parentFolder\apk\ -Filter *debug.apk | Remove-Item
 Get-ChildItem $parentFolder\apk\ -Filter *aligned.apk | Remove-Item
-#Get-ChildItem $parentFolder\apk\ -Filter *unsigned.apk | Remove-Item
+Get-ChildItem $parentFolder\apk\ -Filter *unsigned.apk | Remove-Item
 }
 
 
