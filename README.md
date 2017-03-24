@@ -9,11 +9,11 @@ For Windows 10 Users: Right-click buildAndroidAPS.bat and look for "Allow" check
 
 2.) Install Git, then JDK, then Android SDK, if you want you can Install AndroidStudio too but this step is oprtional.
 
-3.) clone aaps, then switch to dev branch. With switch to dev branch you can also update your local repo to latest dev branch if there is an update.
+3.) clone aaps, then switch to dev branch. With switch to dev branch you can also update your local repo to latest dev branch if there is an update. you only need to do this one time, then you can use switch branch to update.
 
 4.) select build and build what you want. the debug apk's are signed with debug key. 
 
-5.) create a signing keystore.
+5.) create a signing keystore. this step you only have to do one time. you can use one signing key for all apk's
 
 6.) sign your release apk's or debug apk's. if you sign booth you can always switch between debug.apk and release.apk, because they have the same key. if you not sign debug.apk with the release key you have to uninstall the debug.apk before installing a release.apk.
 
