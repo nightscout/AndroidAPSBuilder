@@ -1,12 +1,9 @@
 # AndroidAPSBuilder
 Utilities to build AndroidAPS apk
 
-For Windows 10 Users:
-
-Right-click buildAndroidAPS.bat and look for "Allow" checkbox and check it!
-
-
 Small HowTo:
+
+For Windows 10 Users: Right-click buildAndroidAPS.bat and look for "Allow" checkbox and check it!
 
 1.) If you use win 7,8 or 8.1 -> update powershell with first menu entry, then restart computer.
 
