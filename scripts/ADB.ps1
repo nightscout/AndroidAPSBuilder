@@ -47,19 +47,20 @@ anykey
 # Get serialno and write it
 Write-Host ""
 Write-Host –NoNewLine "Connected device: "
-$serial = & $adbPath get-serialno
-Write-Host "$serial"
-Write-Host ""
+$serial= cmd /c $adbPath get-serialno '2>&1' | Out-String | Tee-Object -Variable serial
 		
 # If no device is connected 
-if ($serial -eq "unknown") {
-	Write-Host "Error: No device connected."
+if ($serial -like "*unknown*") {
+	Write-Host "Error: No device connected." -foregroundcolor red
 	return
-	}
-elseif ($serial -eq "error*") {
-	Write-Host "Error: No device connected."
+	} elseif ($serial -like "*no devices/emulators found*") {
+	Write-Host "Error: No device connected." -foregroundcolor red
 	return
-} else {	
+	} elseif ($serial -like "*unauthorized*") {
+	Write-Host "Error: Device not authorized. Check Screen to grand authorization." -foregroundcolor red
+	return
+} else {
+Write-Host "$serial"	
 write-host "	================================================"
 $apks = Get-ChildItem $apkFolder -Filter *.apk
 $menu = @{}
