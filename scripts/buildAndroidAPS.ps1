@@ -199,6 +199,12 @@ Get-ChildItem $apkFolder -Filter *.apk | Foreach-Object {
 		}
 }
 
+function removeApk {
+Get-ChildItem $parentFolder\apk\ -Filter *debug.apk | Remove-Item
+Get-ChildItem $parentFolder\apk\ -Filter *aligned.apk | Remove-Item
+Get-ChildItem $parentFolder\apk\ -Filter *unsigned.apk | Remove-Item
+}
+
 function signAPK {
 $buildTools = (gci $androidSDK\build-tools\ | sort LastWriteTime | select -last 1).FullName
 $keystorepw = read-host "Keystore password"
@@ -216,6 +222,7 @@ Get-ChildItem $parentFolder\apk -Filter *unsigned.apk |
 		if ($signer -like "*password was incorrect*") {
 		write-host "password was incorrect" -foregroundcolor red
 		anykey
+		removeApk
 		MainMenu
 		} else {
 		$verify = cmd /c $buildtools\apksigner.bat verify -v $parentFolder\apk\$signedName.apk '2>&1' | Out-String | Tee-Object -Variable verify
@@ -237,6 +244,7 @@ Get-ChildItem $parentFolder\apk\ -Filter *debug.apk |
 		if ($signer -like "*password was incorrect*") {
 		write-host "password was incorrect" -foregroundcolor red
 		anykey
+		removeApk
 		MainMenu
 		} else {
 		$verify = cmd /c $buildtools\apksigner.bat verify -v $parentFolder\apk\$signedName.apk '2>&1' | Out-String | Tee-Object -Variable verify
@@ -244,10 +252,7 @@ Get-ChildItem $parentFolder\apk\ -Filter *debug.apk |
 		write-host "Signing of $signedName.apk complete"  -foregroundcolor magenta
 		write-host ""}
 	}
-	
-Get-ChildItem $parentFolder\apk\ -Filter *debug.apk | Remove-Item
-Get-ChildItem $parentFolder\apk\ -Filter *aligned.apk | Remove-Item
-Get-ChildItem $parentFolder\apk\ -Filter *unsigned.apk | Remove-Item
+	removeApk
 }
 
 function Set-Key {
