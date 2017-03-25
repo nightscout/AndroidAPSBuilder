@@ -52,12 +52,15 @@ $serial= cmd /c $adbPath get-serialno '2>&1' | Out-String | Tee-Object -Variable
 # If no device is connected 
 if ($serial -like "*unknown*") {
 	Write-Host "Error: No device connected." -foregroundcolor red
+	& $adbPath kill-server
 	return
 	} elseif ($serial -like "*no devices/emulators found*") {
 	Write-Host "Error: No device connected." -foregroundcolor red
+	& $adbPath kill-server
 	return
 	} elseif ($serial -like "*unauthorized*") {
 	Write-Host "Error: Device not authorized. Check Screen to grand authorization." -foregroundcolor red
+	& $adbPath kill-server
 	return
 } else {
 Write-Host "$serial"	
