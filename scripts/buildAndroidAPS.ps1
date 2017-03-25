@@ -111,7 +111,7 @@ if (!($password -eq $password2)) {
 MainMenu
 }
 $options = "Full","NSClient","Openloop","Pumpcontrol","-Main Menu-","-Exit-"
-	$selection = Menu $options "Build AndroidAPS"
+	$selection = Menu $options "Select Build Flavor"
 	Switch ($selection) {
 		"Full" {$flavor = "Full";buildType;anykey;MainMenu}
 		"NSClient" {$flavor = "NSClient";buildType;anykey;MainMenu}
@@ -124,7 +124,7 @@ $options = "Full","NSClient","Openloop","Pumpcontrol","-Main Menu-","-Exit-"
 
 function buildType {
 $options = "Debug","Release","-Main Menu-","-Exit-"
-	$selection = Menu $options "Select Wear Options!"
+	$selection = Menu $options "Select Build Type!"
 	Switch ($selection) {
 		"Debug" {$type= "Debug";assemble}
 		"Release" {$type = "Release";assemble}
@@ -183,8 +183,7 @@ function copyDebugApk {
 Get-ChildItem $apkFolder -Filter *debug.apk | Foreach-Object {
 		$fullname = $_.FullName
 		write-host "======================================================"
-		write-host "copy $_ to"
-		write-host "$parentFolder\apk\"
+		write-host "copy $_ to`r`n$parentFolder\apk\" -foregroundcolor yellow
 		write-host "======================================================"
 		Copy-Item "$fullname" -Destination (New-Item "$parentFolder\apk\" -Type container -Force) -Force
 		}
