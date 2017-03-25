@@ -80,7 +80,7 @@ function Menu {
 ###############Menus and submenus########################
 
 function MainMenu {
-$options = "First install Powershell 5 only for win 7/8/8.1","Install Git","Install Jdk","Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk","Install Android Studio (Optional)`r`n","Clone AAPS to $aapsFolder","Switch to master Branch","Switch to dev Branch`r`n","Build","Generate key for signing","Sign APK's","Install APK`r`n","-Exit-"
+$options = "First install Powershell 5 only for win 7/8/8.1","Install Git","Install Jdk","Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk","Install Android Studio (Optional)`r`n","Clone AAPS to $aapsFolder","Switch to or update master Branch","Switch to or update dev Branch`r`n","Build","Generate key for signing","Sign APK's","Install APK`r`n","-Exit-"
 	$selection = Menu $options "Build AndroidAPS"
 	Switch ($selection) {
 		"First install Powershell 5 only for win 7/8/8.1" {cls;installPS5;anykey;Exit}
@@ -89,8 +89,8 @@ $options = "First install Powershell 5 only for win 7/8/8.1","Install Git","Inst
 		"Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk" {cls;.$scriptroot\installAndroidSDK.ps1;anykey;MainMenu}
 		"Install Android Studio (Optional)`r`n" {cls;.$scriptroot\installAndroidStudio.ps1;anykey;MainMenu}
 		"Clone AAPS to $aapsFolder" {cls;git clone $gitRepo $aapsFolder;addRemote;anykey;MainMenu}
-		"Switch to master Branch" {cls;fetchMainRepo;resetRepo master;anykey;MainMenu}		
-		"Switch to dev Branch`r`n" {cls;fetchMainRepo;resetRepo dev;anykey;MainMenu}
+		"Switch to or update master Branch" {cls;fetchMainRepo;resetRepo master;anykey;MainMenu}		
+		"Switch to or update dev Branch`r`n" {cls;fetchMainRepo;resetRepo dev;anykey;MainMenu}
 		"Build" {buildaaps}
 		"Generate key for signing" {cls;generateKey;anykey;MainMenu}
 		"Sign APK's" {cls;.$scriptroot\signAPK.ps1;anykey;MainMenu}
