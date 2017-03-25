@@ -87,7 +87,12 @@ anykey
 	
 # Install APK
 Write-Host –NoNewLine "Installing: "
-& $adbPath install -r $selection
+$install= cmd /c $adbPath install -r $selection '2>&1' | Out-String | Tee-Object -Variable install
+if ($install -like "*Success*") {
+write-host "Successful" -foregroundcolor magenta
+} else {
+write-host $install -foregroundcolor red
+}
 	
 # Shutdown ADB server
 & $adbPath kill-server
