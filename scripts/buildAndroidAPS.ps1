@@ -206,39 +206,22 @@ Get-ChildItem $parentFolder\apk\ -Filter *unsigned.apk | Remove-Item
 }
 
 function signAPK {
+copyApk
 $buildTools = (gci $androidSDK\build-tools\ | sort LastWriteTime | select -last 1).FullName
 $keystorepw = read-host "Keystore password"
-copyApk
-Get-ChildItem $parentFolder\apk -Filter *unsigned.apk | 
+Get-ChildItem $parentFolder\apk\* -Include *unsigned.apk, *debug.apk | 
 	Foreach-Object {
-		write-host "======================================================"
+		write-host ("=" * ($_.FullName.length + 10))
 		write-host "Signing $_" -foregroundcolor magenta
-		write-host "======================================================"
+		write-host ("=" * ($_.FullName.length + 10))
 		write-host ""
 		$basename = $_.BaseName
-		$signedName = $basename.Replace("unsigned","signed")
-		$zipalign = cmd /c $buildtools\zipalign.exe -p 4 $_.FullName $parentFolder\apk\$basename-aligned.apk '2>&1' | Out-String | Tee-Object -Variable zipalign
-		$signer= cmd /c $buildtools\apksigner.bat sign --verbose --ks $parentFolder\aaps-release-key.jks --ks-pass pass:$keystorepw --out $parentFolder\apk\$signedName.apk $parentFolder\apk\$basename-aligned.apk '2>&1' | Out-String | Tee-Object -Variable signer
-		if ($signer -like "*password was incorrect*") {
-		write-host "password was incorrect" -foregroundcolor red
-		anykey
-		removeApk
-		MainMenu
-		} else {
-		$verify = cmd /c $buildtools\apksigner.bat verify -v $parentFolder\apk\$signedName.apk '2>&1' | Out-String | Tee-Object -Variable verify
-		write-host -nonewline $verify
-		write-host "Signing of $signedName.apk complete"  -foregroundcolor magenta
-		write-host ""}
-	}
-
-Get-ChildItem $parentFolder\apk\ -Filter *debug.apk | 
-	Foreach-Object {
-		write-host "======================================================"
-		write-host "Signing $_" -foregroundcolor magenta
-		write-host "======================================================"
-		write-host ""
-		$basename = $_.BaseName
-		$signedName = $basename.Replace("debug","debug-release-signed")
+		if ($_.FullName -like "*debug.apk") {
+			$signedName = $basename.Replace("debug","debug-release-signed")
+		}
+		if ($_.FullName -like "*unsigned.apk") {
+			$signedName = $basename.Replace("unsigned","signed")
+		}
 		$zipalign = cmd /c $buildtools\zipalign.exe -p 4 $_.FullName $parentFolder\apk\$basename-aligned.apk '2>&1' | Out-String | Tee-Object -Variable zipalign
 		$signer= cmd /c $buildtools\apksigner.bat sign --verbose --ks $parentFolder\aaps-release-key.jks --ks-pass pass:$keystorepw --out $parentFolder\apk\$signedName.apk $parentFolder\apk\$basename-aligned.apk '2>&1' | Out-String | Tee-Object -Variable signer
 		if ($signer -like "*password was incorrect*") {
