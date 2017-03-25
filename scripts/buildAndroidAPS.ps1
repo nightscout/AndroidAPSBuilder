@@ -217,7 +217,7 @@ Get-ChildItem $parentFolder\apk\* -Include *unsigned.apk, *debug.apk |
 		write-host ""
 		$basename = $_.BaseName
 		if ($_.FullName -like "*debug.apk") {
-			$signedName = $basename.Replace("debug","debug-release-signed")
+			$signedName = $basename.Replace("debug","debug-signed")
 		}
 		if ($_.FullName -like "*unsigned.apk") {
 			$signedName = $basename.Replace("unsigned","signed")
