@@ -93,6 +93,8 @@ Write-Host –NoNewLine "Installing: "
 $install= cmd /c $adbPath install -r $selection '2>&1' | Out-String | Tee-Object -Variable install
 if ($install -like "*Success*") {
 write-host "Successful" -foregroundcolor magenta
+} elseif ($install -like "*INSTALL_FAILED_UPDATE_INCOMPATIBLE*") {
+write-host "Failure [INSTALL_FAILED_UPDATE_INCOMPATIBLE]" -foregroundcolor red
 } else {
 write-host $install -foregroundcolor red
 }
