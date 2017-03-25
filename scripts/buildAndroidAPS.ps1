@@ -163,8 +163,8 @@ function fetchMainRepo {
 git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder fetch mainRepo
 }
 
-function resetRepo($repo) {
-git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder reset --hard mainRepo/$repo		
+function resetRepo($branch) {
+git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder reset --hard mainRepo/$branch		
 }
 
 function addRemote {
