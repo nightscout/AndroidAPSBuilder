@@ -38,54 +38,44 @@ copyApk
 Get-ChildItem $parentFolder\apk -Filter *unsigned.apk | 
 	Foreach-Object {
 		write-host "======================================================"
-		write-host "Signing $_" -foregroundcolor yellow
+		write-host "Signing $_" -foregroundcolor magenta
 		write-host "======================================================"
 		write-host ""
 		$basename = $_.BaseName
 		$signedName = $basename.Replace("unsigned","signed")
-		& $buildtools\zipalign.exe -p 4 $_.FullName $parentFolder\apk\$basename-aligned.apk
-		write-host "---------"
-		& $buildtools\apksigner.bat sign --verbose --ks $parentFolder\aaps-release-key.jks --ks-pass pass:$keystorepw --out $parentFolder\apk\$signedName.apk $parentFolder\apk\$basename-aligned.apk 
-		<#
-		$jar = & jarsigner.exe -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore "$parentFolder\aaps-release-key.jks" -storepass "$keystorepw" -keypass "$keystorepw" -signedjar "$parentFolder\apk\$signedName.apk" "$parentFolder\apk\$basename-aligned.apk" aaps-key | Tee-Object -Variable jar
-		if ($jar -like "*you must enter key password*" -or $jar -like "*jarsigner error*") {
-		write-host $jar
-		anykey
-		MainMenu
-		}
-		#>
-		write-host "---------"
-		& $buildtools\apksigner.bat verify -v $parentFolder\apk\$signedName.apk
+		$zipalign = cmd /c $buildtools\zipalign.exe -p 4 $_.FullName $parentFolder\apk\$basename-aligned.apk '2>&1' | Out-String | Tee-Object -Variable zipalign
+		$signer= cmd /c $buildtools\apksigner.bat sign --verbose --ks $parentFolder\aaps-release-key.jks --ks-pass pass:$keystorepw --out $parentFolder\apk\$signedName.apk $parentFolder\apk\$basename-aligned.apk '2>&1' | Out-String | Tee-Object -Variable signer
+		if ($signer -like "*password was incorrect*") {
+		write-host "password was incorrect" -foregroundcolor red
+		return
+		} else {
+		$verify = cmd /c $buildtools\apksigner.bat verify -v $parentFolder\apk\$signedName.apk '2>&1' | Out-String | Tee-Object -Variable verify
+		write-host -nonewline $verify
 		write-host "Signing of $signedName.apk complete"  -foregroundcolor magenta
-		write-host ""
-		write-host ""
+		write-host ""}
 	}
-	
+	if ($signer -like "*password was incorrect*") {return}
+
 Get-ChildItem $parentFolder\apk\ -Filter *debug.apk | 
 	Foreach-Object {
 		write-host "======================================================"
-		write-host "Signing $_" -foregroundcolor yellow
+		write-host "Signing $_" -foregroundcolor magenta
 		write-host "======================================================"
 		write-host ""
 		$basename = $_.BaseName
 		$signedName = $basename.Replace("debug","debug-release-signed")
-		& $buildtools\zipalign.exe -p 4 $_.FullName $parentFolder\apk\$basename-aligned.apk
-		write-host "---------"
-		& $buildtools\apksigner.bat sign --verbose --ks $parentFolder\aaps-release-key.jks --ks-pass pass:$keystorepw --out $parentFolder\apk\$signedName.apk $parentFolder\apk\$basename-aligned.apk 
-		<#
-		$jar = & jarsigner.exe -verbose -sigalg SHA1withRSA  -digestalg SHA1 -keystore "$parentFolder\aaps-release-key.jks" -storepass "$keystorepw" -keypass "$keystorepw" -signedjar "$parentFolder\apk\$signedName.apk" "$parentFolder\apk\$basename-aligned.apk" aaps-key | Tee-Object -Variable jar
-		if ($jar -like "*you must enter key password*" -or $jar -like "*jarsigner error*") {
-		write-host $jar
-		anykey
-		MainMenu
-		}
-		#>
-		write-host "---------"
-		& $buildtools\apksigner.bat verify -v -Werr $parentFolder\apk\$signedName.apk			
+		$zipalign = cmd /c $buildtools\zipalign.exe -p 4 $_.FullName $parentFolder\apk\$basename-aligned.apk '2>&1' | Out-String | Tee-Object -Variable zipalign
+		$signer= cmd /c $buildtools\apksigner.bat sign --verbose --ks $parentFolder\aaps-release-key.jks --ks-pass pass:$keystorepw --out $parentFolder\apk\$signedName.apk $parentFolder\apk\$basename-aligned.apk '2>&1' | Out-String | Tee-Object -Variable signer
+		if ($signer -like "*password was incorrect*") {
+		write-host "password was incorrect" -foregroundcolor red
+		return
+		} else {
+		$verify = cmd /c $buildtools\apksigner.bat verify -v $parentFolder\apk\$signedName.apk '2>&1' | Out-String | Tee-Object -Variable verify
+		write-host -nonewline $verify
 		write-host "Signing of $signedName.apk complete"  -foregroundcolor magenta
-		write-host ""
-		write-host ""
+		write-host ""}
 	}
+	if ($signer -like "*password was incorrect*") {return}
 	
 Get-ChildItem $parentFolder\apk\ -Filter *debug.apk | Remove-Item
 Get-ChildItem $parentFolder\apk\ -Filter *aligned.apk | Remove-Item
