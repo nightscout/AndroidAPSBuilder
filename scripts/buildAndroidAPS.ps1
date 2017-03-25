@@ -101,7 +101,7 @@ $options = "First install Powershell 5 only for win 7/8/8.1","Install Git","Inst
 		git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder reset --hard mainRepo/dev;anykey;MainMenu}
 		"Build" {buildaaps}
 		"Generate key for signing" {cls;keytool -genkey -v -keystore $parentFolder\aaps-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias aaps-key;anykey;MainMenu}
-		"Sign APK's" {cls;signAPK;anykey;MainMenu}
+		"Sign APK's" {cls;.$scriptroot\signAPK.ps1;anykey;MainMenu}
 		"Install APK`r`n" {cls;.$scriptroot\ADB.ps1;anykey;MainMenu}
 		"-Exit-" {Exit}
 	}
@@ -178,17 +178,6 @@ Get-ChildItem $apkFolder -Filter *debug.apk | Foreach-Object {
 		}
 }
 
-function copyApk {
-Get-ChildItem $apkFolder -Filter *.apk | Foreach-Object {
-		$fullname = $_.FullName
-		write-host "======================================================"
-		write-host "copy $_ to"
-		write-host "$parentFolder\apk\"
-		write-host "======================================================"
-		Copy-Item "$fullname" -Destination (New-Item "$parentFolder\apk\" -Type container -Force) -Force
-		}
-}
-
 function Set-Key {
 param([string]$string)
 $length = $string.length
@@ -213,69 +202,6 @@ param($key,$data)
 $data | ConvertTo-SecureString -key $key |
 ForEach-Object {[Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($_))}
 }
-
-function signAPK {
-$buildTools = (gci $androidSDK\build-tools\ | sort LastWriteTime | select -last 1).FullName
-$keystorepw = read-host "Keystore password"
-copyApk
-Get-ChildItem $parentFolder\apk -Filter *unsigned.apk | 
-	Foreach-Object {
-		write-host "======================================================"
-		write-host "Signing $_"
-		write-host "======================================================"
-		write-host ""
-		$basename = $_.BaseName
-		$signedName = $basename.Replace("unsigned","signed")
-		& $buildtools\zipalign.exe -p 4 $_.FullName $parentFolder\apk\$basename-aligned.apk
-		write-host "---------"
-		& $buildtools\apksigner.bat sign --verbose --ks $parentFolder\aaps-release-key.jks --ks-pass pass:$keystorepw --out $parentFolder\apk\$signedName.apk $parentFolder\apk\$basename-aligned.apk 
-		<#
-		$jar = & jarsigner.exe -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore "$parentFolder\aaps-release-key.jks" -storepass "$keystorepw" -keypass "$keystorepw" -signedjar "$parentFolder\apk\$signedName.apk" "$parentFolder\apk\$basename-aligned.apk" aaps-key | Tee-Object -Variable jar
-		if ($jar -like "*you must enter key password*" -or $jar -like "*jarsigner error*") {
-		write-host $jar
-		anykey
-		MainMenu
-		}
-		#>
-		write-host "---------"
-		& $buildtools\apksigner.bat verify -v $parentFolder\apk\$signedName.apk
-		write-host "Signing of $signedName.apk complete"
-		write-host ""
-		write-host ""
-	}
-	
-Get-ChildItem $parentFolder\apk\ -Filter *debug.apk | 
-	Foreach-Object {
-		write-host "======================================================"
-		write-host "Signing $_"
-		write-host "======================================================"
-		write-host ""
-		$basename = $_.BaseName
-		$signedName = $basename.Replace("debug","debug-release-signed")
-		& $buildtools\zipalign.exe -p 4 $_.FullName $parentFolder\apk\$basename-aligned.apk
-		write-host "---------"
-		& $buildtools\apksigner.bat sign --verbose --ks $parentFolder\aaps-release-key.jks --ks-pass pass:$keystorepw --out $parentFolder\apk\$signedName.apk $parentFolder\apk\$basename-aligned.apk 
-		<#
-		$jar = & jarsigner.exe -verbose -sigalg SHA1withRSA  -digestalg SHA1 -keystore "$parentFolder\aaps-release-key.jks" -storepass "$keystorepw" -keypass "$keystorepw" -signedjar "$parentFolder\apk\$signedName.apk" "$parentFolder\apk\$basename-aligned.apk" aaps-key | Tee-Object -Variable jar
-		if ($jar -like "*you must enter key password*" -or $jar -like "*jarsigner error*") {
-		write-host $jar
-		anykey
-		MainMenu
-		}
-		#>
-		write-host "---------"
-		& $buildtools\apksigner.bat verify -v -Werr $parentFolder\apk\$signedName.apk			
-		write-host "Signing of $signedName.apk complete"
-		write-host ""
-		write-host ""
-	}
-	
-Get-ChildItem $parentFolder\apk\ -Filter *debug.apk | Remove-Item
-Get-ChildItem $parentFolder\apk\ -Filter *aligned.apk | Remove-Item
-Get-ChildItem $parentFolder\apk\ -Filter *unsigned.apk | Remove-Item
-}
-
-
 
 function disclaimer {
 
