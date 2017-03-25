@@ -89,8 +89,8 @@ $options = "First install Powershell 5 only for win 7/8/8.1","Install Git","Inst
 		"Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk" {cls;.$scriptroot\installAndroidSDK.ps1;anykey;MainMenu}
 		"Install Android Studio (Optional)`r`n" {cls;.$scriptroot\installAndroidStudio.ps1;anykey;MainMenu}
 		"Clone AAPS to $aapsFolder" {cls;git clone $gitRepo $aapsFolder;addRemote;anykey;MainMenu}
-		"Switch to or update master Branch" {cls;fetchMainRepo;resetRepo master;anykey;MainMenu}		
-		"Switch to or update dev Branch`r`n" {cls;fetchMainRepo;resetRepo dev;anykey;MainMenu}
+		"Switch to or update master Branch" {cls;fetchRemoteRepo;resetRepo master;anykey;MainMenu}		
+		"Switch to or update dev Branch`r`n" {cls;fetchRemoteRepo;resetRepo dev;anykey;MainMenu}
 		"Build" {buildaaps}
 		"Generate key for signing" {cls;generateKey;anykey;MainMenu}
 		"Sign APK's" {cls;signAPK;anykey;MainMenu}
@@ -159,16 +159,16 @@ Write-Host "Press Any Key To Continue... "
 $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 }
 
-function fetchMainRepo {
-git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder fetch mainRepo
+function fetchRemoteRepo {
+git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder fetch remoteRepo
 }
 
 function resetRepo($branch) {
-git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder reset --hard mainRepo/$branch		
+git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder reset --hard remoteRepo/$branch		
 }
 
 function addRemote {
-git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder remote add mainRepo $gitRepo
+git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder remote add remoteRepo $gitRepo
 }
 
 function installPS5 {
