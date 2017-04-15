@@ -200,7 +200,6 @@ Get-ChildItem $apkFolder -Filter *.apk | Foreach-Object {
 }
 
 function removeApk {
-Get-ChildItem $parentFolder\apk\ -Filter *debug.apk | Remove-Item
 Get-ChildItem $parentFolder\apk\ -Filter *aligned.apk | Remove-Item
 Get-ChildItem $parentFolder\apk\ -Filter *unsigned.apk | Remove-Item
 }
