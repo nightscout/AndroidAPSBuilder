@@ -91,7 +91,7 @@ $options = "First install Powershell 5 only for win 7/8/8.1","Install Git","Inst
 		"Clone AAPS to $aapsFolder" {cls;git clone $gitRepo $aapsFolder;addRemote;anykey;MainMenu}
 		"Switch to or update master Branch" {cls;fetchRemoteRepo;resetRepo master;anykey;MainMenu}		
 		"Switch to or update dev Branch`r`n" {cls;fetchRemoteRepo;resetRepo dev;anykey;MainMenu}
-		"Build" {buildaaps}
+		"Build" {cls;buildaaps;anykey;MainMenu}
 		"Generate key for signing" {cls;generateKey;anykey;MainMenu}
 		"Sign APK's" {cls;signAPK;anykey;MainMenu}
 		"Install APK`r`n" {cls;.$scriptroot\ADB.ps1;anykey;MainMenu}
