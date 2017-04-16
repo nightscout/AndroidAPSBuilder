@@ -269,6 +269,7 @@ function signAPK {
 checkJava_Home
 checkAndroid_Home
 copyApk
+$androidSDK = "$Env:ANDROID_HOME" 
 $buildTools = (gci $androidSDK\build-tools\ | sort LastWriteTime | select -last 1).FullName
 $keystorepw = read-host "Keystore password"
 Get-ChildItem $parentFolder\apk\* -Include *unsigned.apk, *debug.apk | 
