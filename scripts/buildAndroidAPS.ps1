@@ -171,6 +171,10 @@ function selectRepo {
 	" -foregroundcolor magenta
 anykey
 cls
+$currentBranch = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder status -b)[0]
+$currentBranch = $currentBranch.replace("HEAD detached at remoteRepo/","")
+$currentBranch = $currentBranch.replace("On branch ","")
+write-host "`r`n	Current Branch: $currentBranch`r`n" -foregroundcolor magenta
 $apks = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder ls-remote --heads remoteRepo).Substring(52)
 write-host "	================================================"
 write-host "	=============== select branch =================="
@@ -188,7 +192,7 @@ resetRepo $branch
 }
 
 function resetRepo($branch) {
-git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder reset --hard remoteRepo/$branch		
+git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder checkout -f remoteRepo/$branch				
 }
 
 function addRemote {
