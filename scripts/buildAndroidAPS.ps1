@@ -26,7 +26,6 @@ $parentFolder = (get-item $scriptroot ).parent.FullName
 $aapsFolder = "$parentFolder\AndroidAPS"
 $apkFolder = "$aapsFolder\app\build\outputs\apk"
 $gradlewPath = "$aapsFolder\gradlew.bat"
-$androidSDK = "$Env:ANDROID_HOME"
 $gitRepo = 'https://github.com/MilosKozak/AndroidAPS.git'
 
 
@@ -99,6 +98,14 @@ $options = "First install Powershell 5 only for win 7/8/8.1","Install Git","Inst
 }
 
 function buildaaps {
+$env:ANDROID_HOME = [System.Environment]::GetEnvironmentVariable("ANDROID_HOME","Machine") 
+If (Test-Path env:ANDROID_HOME) {			
+	$androidSDK = "$Env:ANDROID_HOME"
+	} else {
+	Write-Host "`r`nANDROID_HOME environment varible not set. please install android SDK!`r`n" -foregroundcolor red
+	anykey
+	MainMenu
+}
 $key = Set-Key "AndroidAPSpasswordkey"
 #$plainText = "password"
 #$encryptedTextThatIcouldSaveToFile = Set-EncryptedData -key $key -plainText $plaintext
@@ -234,6 +241,14 @@ Get-ChildItem $parentFolder\apk\ -Filter *unsigned.apk | Remove-Item
 
 function signAPK {
 copyApk
+$env:ANDROID_HOME = [System.Environment]::GetEnvironmentVariable("ANDROID_HOME","Machine") 
+If (Test-Path env:ANDROID_HOME) {			
+	$androidSDK = "$Env:ANDROID_HOME"
+	} else {
+	Write-Host "`r`nANDROID_HOME environment varible not set. please install android SDK!`r`n" -foregroundcolor red
+	anykey
+	MainMenu
+}
 $buildTools = (gci $androidSDK\build-tools\ | sort LastWriteTime | select -last 1).FullName
 $keystorepw = read-host "Keystore password"
 Get-ChildItem $parentFolder\apk\* -Include *unsigned.apk, *debug.apk | 
