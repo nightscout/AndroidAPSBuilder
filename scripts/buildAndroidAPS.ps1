@@ -80,7 +80,7 @@ function Menu {
 ###############Menus and submenus########################
 
 function MainMenu {
-$options = "First install Powershell 5 only for win 7/8/8.1","Install Git","Install Jdk","Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk","Install Android Studio (Optional)`r`n","Clone AAPS to $aapsFolder","Switch to or update master Branch","Switch to or update dev Branch`r`n","Build","Generate key for signing","Sign APK's","Install APK`r`n","-Exit-"
+$options = "First install Powershell 5 only for win 7/8/8.1","Install Git","Install Jdk","Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk","Install Android Studio (Optional)`r`n","Clone AAPS to $aapsFolder","Switch to or update local Branch`r`n","Build","Generate key for signing","Sign APK's","Install APK`r`n","-Exit-"
 	$selection = Menu $options "Build AndroidAPS"
 	Switch ($selection) {
 		"First install Powershell 5 only for win 7/8/8.1" {cls;installPS5;anykey;Exit}
@@ -89,8 +89,7 @@ $options = "First install Powershell 5 only for win 7/8/8.1","Install Git","Inst
 		"Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk" {cls;.$scriptroot\installAndroidSDK.ps1;anykey;MainMenu}
 		"Install Android Studio (Optional)`r`n" {cls;.$scriptroot\installAndroidStudio.ps1;anykey;MainMenu}
 		"Clone AAPS to $aapsFolder" {cls;git clone $gitRepo $aapsFolder;addRemote;anykey;MainMenu}
-		"Switch to or update master Branch" {cls;fetchRemoteRepo;resetRepo master;anykey;MainMenu}		
-		"Switch to or update dev Branch`r`n" {cls;fetchRemoteRepo;resetRepo dev;anykey;MainMenu}
+		"Switch to or update local Branch`r`n" {cls;fetchRemoteRepo;selectRepo;anykey;MainMenu}
 		"Build" {cls;buildaaps;anykey;MainMenu}
 		"Generate key for signing" {cls;generateKey;anykey;MainMenu}
 		"Sign APK's" {cls;signAPK;anykey;MainMenu}
@@ -161,6 +160,31 @@ $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 
 function fetchRemoteRepo {
 git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder fetch remoteRepo
+cls
+}
+
+function selectRepo {
+	Write-Host "
+  * WARNING: *
+	if you select a branch all local data will be reset, this means all changes you have done
+	to the original aaps source code are lost. Backup it before continue.
+	" -foregroundcolor magenta
+anykey
+cls
+$apks = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder ls-remote --heads remoteRepo).Substring(52)
+write-host "	================================================"
+write-host "	=============== select branch =================="
+write-host "	================================================"
+$menu = @{}
+for ($i=1;$i -le $apks.count; $i++) {
+   Write-Host "	$i $($apks[$i-1])" -fore "yellow"
+   $menu.Add($i,($apks[$i-1]))
+   }
+write-host "	================================================"
+write-host ""
+[int]$ans = Read-Host 'Enter number of brach'
+$branch = $menu.Item($ans)
+resetRepo $branch
 }
 
 function resetRepo($branch) {
