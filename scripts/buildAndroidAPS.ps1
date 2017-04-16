@@ -79,7 +79,7 @@ function Menu {
 ###############Menus and submenus########################
 
 function MainMenu {
-$options = "install Required Software`r`n","Clone AAPS to $aapsFolder","Switch to or update local Branch`r`n","Build","Generate key for signing","Sign APK's","Install APK`r`n","-Exit-"
+$options = "install Required Software`r`n","Clone AAPS to $aapsFolder","Switch or update local Branch`r`n","Build","Generate key for signing","Sign APK's","Install APK`r`n","-Exit-"
 	$selection = Menu $options "Build AndroidAPS"
 	Switch ($selection) {
 		"install Required Software`r`n" {cls;requiredSoftware;anykey;MainMenu}
