@@ -119,8 +119,10 @@ $passwordhash = "76492d1116743f0423413b16050a5345MgB8ADMAOQBIAG0AYwBkAEUANABTAGw
 $password2 = Get-EncryptedData -data $passwordhash -key $key
 $password = read-host "password"
 if (!($password -eq $password2)) {
-MainMenu
-}
+	write-host "`r`nwrong password!" -foregroundcolor red
+	anykey
+	MainMenu
+	}
 $options = "Full","NSClient","Openloop","Pumpcontrol","-Main Menu-","-Exit-"
 	$selection = Menu $options "Select Build Flavor"
 	Switch ($selection) {
@@ -150,14 +152,17 @@ $options = "Nowear","Wear","Wearcontrol","-Main Menu-","-Exit-"
 	Switch ($selection) {
 		"Nowear" {
 		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Nowear`"$type`""
+		renameAPK
 		cmd.exe /C "`"$gradlewPath`" --stop"
 		copyDebugApk}
 		"Wear" {
 		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Wear`"$type`""
+		renameAPK
 		cmd.exe /C "`"$gradlewPath`" --stop"
 		copyDebugApk}
 		"Wearcontrol" {
 		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Wearcontrol`"$type`""
+		renameAPK
 		cmd.exe /C "`"$gradlewPath`" --stop" 		
 		copyDebugApk}
 		"-Main Menu-" {MainMenu}
@@ -170,6 +175,18 @@ Write-Host "Press Any Key To Continue... "
 $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 }
 
+function renameAPK {
+#git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder branch -vv | select-string -pattern '\*'				
+$commitID = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder show --format="%h" --no-patch
+$currentBranch = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder status -b)[0]
+$currentBranch = $currentBranch.replace("HEAD detached at remoteRepo/","")
+$currentBranch = $currentBranch.replace("On branch ","")
+$latest = Get-ChildItem -Path $apkFolder | Sort-Object LastAccessTime -Descending | Select-Object -First 1 
+$oldfilename = ($latest.Name).replace("app-","")
+$filename = "$currentBranch" + "_" + "$commitID" + "_" + $oldfilename
+Get-ChildItem -Path $apkFolder | Sort-Object LastAccessTime -Descending | Select-Object -First 1 | Rename-Item -NewName "$filename"
+}
+
 function checkAndroid_Home {
 $env:ANDROID_HOME = [System.Environment]::GetEnvironmentVariable("ANDROID_HOME","Machine") 
 If (Test-Path env:ANDROID_HOME) {			
@@ -178,7 +195,7 @@ If (Test-Path env:ANDROID_HOME) {
 	Write-Host "`r`nANDROID_HOME environment variable not set. please install android SDK!`r`n" -foregroundcolor red
 	anykey
 	MainMenu
-}
+	}
 }
 
 function checkJava_Home {
@@ -207,7 +224,6 @@ If (!(Test-Path $aapsFolder)) {
 	MainMenu
 	}
 }
-
 
 function fetchRemoteRepo {
 git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder fetch remoteRepo
