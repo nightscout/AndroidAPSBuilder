@@ -84,8 +84,8 @@ $options = "install Required Software`r`n","Clone AAPS to $aapsFolder","Switch o
 	Switch ($selection) {
 		"install Required Software`r`n" {cls;requiredSoftware;anykey;MainMenu}
 		"Clone AAPS to $aapsFolder" {cls;checkGit;git clone $gitRepo $aapsFolder;addRemote;anykey;MainMenu}
-		"Switch or update local Branch`r`n" {cls;checkGit;fetchRemoteRepo;selectRepo;anykey;MainMenu}
-		"Build" {cls;buildaaps;anykey;MainMenu}
+		"Switch or update local Branch`r`n" {cls;checkGit;checkaapsFolder;fetchRemoteRepo;selectRepo;anykey;MainMenu}
+		"Build" {cls;checkaapsFolder;buildaaps;anykey;MainMenu}
 		"Generate key for signing" {cls;generateKey;anykey;MainMenu}
 		"Sign APK's" {cls;signAPK;anykey;MainMenu}
 		"Install APK`r`n" {cls;checkAndroid_Home;.$scriptroot\ADB.ps1;anykey;MainMenu}
@@ -110,6 +110,7 @@ $options = "First install Powershell 5 only for win 7/8/8.1","Install Git","Inst
 function buildaaps {
 checkAndroid_Home
 checkJava_Home
+checkaapsFolder
 $key = Set-Key "AndroidAPSpasswordkey"
 #$plainText = "password"
 #$encryptedTextThatIcouldSaveToFile = Set-EncryptedData -key $key -plainText $plaintext
@@ -199,6 +200,16 @@ Write-Host "`r`nGIT not installed. please install GIT!`r`n" -foregroundcolor red
 	MainMenu
 }
 }
+
+function checkaapsFolder {
+If (Test-Path $aapsFolder) {			
+	} else {
+	Write-Host "`r`nplease clone aaps first!`r`n" -foregroundcolor red
+	anykey
+	MainMenu
+}
+}
+
 
 function fetchRemoteRepo {
 git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder fetch remoteRepo
