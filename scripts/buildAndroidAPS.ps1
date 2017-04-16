@@ -79,20 +79,30 @@ function Menu {
 ###############Menus and submenus########################
 
 function MainMenu {
-$options = "First install Powershell 5 only for win 7/8/8.1","Install Git","Install Jdk","Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk","Install Android Studio (Optional)`r`n","Clone AAPS to $aapsFolder","Switch to or update local Branch`r`n","Build","Generate key for signing","Sign APK's","Install APK`r`n","-Exit-"
+$options = "install Required Software`r`n","Clone AAPS to $aapsFolder","Switch to or update local Branch`r`n","Build","Generate key for signing","Sign APK's","Install APK`r`n","-Exit-"
 	$selection = Menu $options "Build AndroidAPS"
 	Switch ($selection) {
-		"First install Powershell 5 only for win 7/8/8.1" {cls;installPS5;anykey;Exit}
-		"Install Git" {cls;.$scriptroot\installGit.ps1;anykey;MainMenu}
-		"Install Jdk" {cls;.$scriptroot\installJdk.ps1;anykey;MainMenu}
-		"Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk" {cls;checkJava_Home;.$scriptroot\installAndroidSDK.ps1;anykey;MainMenu}
-		"Install Android Studio (Optional)`r`n" {cls;.$scriptroot\installAndroidStudio.ps1;anykey;MainMenu}
+		"install Required Software`r`n" {cls;requiredSoftware;anykey;MainMenu}
 		"Clone AAPS to $aapsFolder" {cls;checkGit;git clone $gitRepo $aapsFolder;addRemote;anykey;MainMenu}
-		"Switch to or update local Branch`r`n" {cls;checkGit;fetchRemoteRepo;selectRepo;anykey;MainMenu}
+		"Switch or update local Branch`r`n" {cls;checkGit;fetchRemoteRepo;selectRepo;anykey;MainMenu}
 		"Build" {cls;buildaaps;anykey;MainMenu}
 		"Generate key for signing" {cls;generateKey;anykey;MainMenu}
 		"Sign APK's" {cls;signAPK;anykey;MainMenu}
 		"Install APK`r`n" {cls;checkAndroid_Home;.$scriptroot\ADB.ps1;anykey;MainMenu}
+		"-Exit-" {Exit}
+	}
+}
+
+function requiredSoftware {
+$options = "First install Powershell 5 only for win 7/8/8.1","Install Git","Install Jdk","Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk`r`n","Install Android Studio (Optional)`r`n","-Main Menu-","-Exit-"
+	$selection = Menu $options "Select Software!"
+	Switch ($selection) {
+		"First install Powershell 5 only for win 7/8/8.1" {cls;installPS5;anykey;Exit}
+		"Install Git" {cls;.$scriptroot\installGit.ps1;anykey;requiredSoftware}
+		"Install Jdk" {cls;.$scriptroot\installJdk.ps1;anykey;requiredSoftware}
+		"Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk`r`n" {cls;checkJava_Home;.$scriptroot\installAndroidSDK.ps1;anykey;requiredSoftware}
+		"Install Android Studio (Optional)`r`n" {cls;.$scriptroot\installAndroidStudio.ps1;anykey;requiredSoftware}
+		"-Main Menu-" {MainMenu}
 		"-Exit-" {Exit}
 	}
 }
@@ -164,7 +174,7 @@ $env:ANDROID_HOME = [System.Environment]::GetEnvironmentVariable("ANDROID_HOME",
 If (Test-Path env:ANDROID_HOME) {			
 	$androidSDK = "$Env:ANDROID_HOME"
 	} else {
-	Write-Host "`r`nANDROID_HOME environment varible not set. please install android SDK!`r`n" -foregroundcolor red
+	Write-Host "`r`nANDROID_HOME environment variable not set. please install android SDK!`r`n" -foregroundcolor red
 	anykey
 	MainMenu
 }
@@ -175,7 +185,7 @@ $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine")
 $env:JAVA_HOME = [System.Environment]::GetEnvironmentVariable("JAVA_HOME","Machine") 
 If (Test-Path env:JAVA_HOME) {			
 	} else {
-	Write-Host "`r`JAVA_HOME environment varible not set. please install JDK!`r`n" -foregroundcolor red
+	Write-Host "`r`JAVA_HOME environment variable not set. please install JDK!`r`n" -foregroundcolor red
 	anykey
 	MainMenu
 }
@@ -218,7 +228,7 @@ for ($i=1;$i -le $apks.count; $i++) {
    }
 write-host "	================================================"
 write-host ""
-[int]$ans = Read-Host 'Enter number of brach'
+[int]$ans = Read-Host 'Enter number of branch'
 $branch = $menu.Item($ans)
 resetRepo $branch
 }
