@@ -85,27 +85,21 @@ $options = "First install Powershell 5 only for win 7/8/8.1","Install Git","Inst
 		"First install Powershell 5 only for win 7/8/8.1" {cls;installPS5;anykey;Exit}
 		"Install Git" {cls;.$scriptroot\installGit.ps1;anykey;MainMenu}
 		"Install Jdk" {cls;.$scriptroot\installJdk.ps1;anykey;MainMenu}
-		"Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk" {cls;.$scriptroot\installAndroidSDK.ps1;anykey;MainMenu}
+		"Install Android SDK to $Env:USERPROFILE\AppData\Local\Android\Sdk" {cls;checkJava_Home;.$scriptroot\installAndroidSDK.ps1;anykey;MainMenu}
 		"Install Android Studio (Optional)`r`n" {cls;.$scriptroot\installAndroidStudio.ps1;anykey;MainMenu}
-		"Clone AAPS to $aapsFolder" {cls;git clone $gitRepo $aapsFolder;addRemote;anykey;MainMenu}
-		"Switch to or update local Branch`r`n" {cls;fetchRemoteRepo;selectRepo;anykey;MainMenu}
+		"Clone AAPS to $aapsFolder" {cls;checkGit;git clone $gitRepo $aapsFolder;addRemote;anykey;MainMenu}
+		"Switch to or update local Branch`r`n" {cls;checkGit;fetchRemoteRepo;selectRepo;anykey;MainMenu}
 		"Build" {cls;buildaaps;anykey;MainMenu}
 		"Generate key for signing" {cls;generateKey;anykey;MainMenu}
 		"Sign APK's" {cls;signAPK;anykey;MainMenu}
-		"Install APK`r`n" {cls;.$scriptroot\ADB.ps1;anykey;MainMenu}
+		"Install APK`r`n" {cls;checkAndroid_Home;.$scriptroot\ADB.ps1;anykey;MainMenu}
 		"-Exit-" {Exit}
 	}
 }
 
 function buildaaps {
-$env:ANDROID_HOME = [System.Environment]::GetEnvironmentVariable("ANDROID_HOME","Machine") 
-If (Test-Path env:ANDROID_HOME) {			
-	$androidSDK = "$Env:ANDROID_HOME"
-	} else {
-	Write-Host "`r`nANDROID_HOME environment varible not set. please install android SDK!`r`n" -foregroundcolor red
-	anykey
-	MainMenu
-}
+checkAndroid_Home
+checkJava_Home
 $key = Set-Key "AndroidAPSpasswordkey"
 #$plainText = "password"
 #$encryptedTextThatIcouldSaveToFile = Set-EncryptedData -key $key -plainText $plaintext
@@ -165,6 +159,37 @@ Write-Host "Press Any Key To Continue... "
 $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 }
 
+function checkAndroid_Home {
+$env:ANDROID_HOME = [System.Environment]::GetEnvironmentVariable("ANDROID_HOME","Machine") 
+If (Test-Path env:ANDROID_HOME) {			
+	$androidSDK = "$Env:ANDROID_HOME"
+	} else {
+	Write-Host "`r`nANDROID_HOME environment varible not set. please install android SDK!`r`n" -foregroundcolor red
+	anykey
+	MainMenu
+}
+}
+
+function checkJava_Home {
+$env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") 
+$env:JAVA_HOME = [System.Environment]::GetEnvironmentVariable("JAVA_HOME","Machine") 
+If (Test-Path env:JAVA_HOME) {			
+	} else {
+	Write-Host "`r`JAVA_HOME environment varible not set. please install JDK!`r`n" -foregroundcolor red
+	anykey
+	MainMenu
+}
+}
+
+function checkGit {
+$env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") 
+if (!(Get-Command git -errorAction SilentlyContinue)) {
+Write-Host "`r`nGIT not installed. please install GIT!`r`n" -foregroundcolor red
+	anykey
+	MainMenu
+}
+}
+
 function fetchRemoteRepo {
 git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder fetch remoteRepo
 cls
@@ -211,6 +236,7 @@ Start-Process "$PSHome\PowerShell.exe" -Verb RunAs -ArgumentList " -ExecutionPol
 }
 
 function generateKey {
+checkJava_Home
 keytool -genkey -v -keystore $parentFolder\aaps-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias aaps-key
 }
 
@@ -240,15 +266,9 @@ Get-ChildItem $parentFolder\apk\ -Filter *unsigned.apk | Remove-Item
 }
 
 function signAPK {
+checkJava_Home
+checkAndroid_Home
 copyApk
-$env:ANDROID_HOME = [System.Environment]::GetEnvironmentVariable("ANDROID_HOME","Machine") 
-If (Test-Path env:ANDROID_HOME) {			
-	$androidSDK = "$Env:ANDROID_HOME"
-	} else {
-	Write-Host "`r`nANDROID_HOME environment varible not set. please install android SDK!`r`n" -foregroundcolor red
-	anykey
-	MainMenu
-}
 $buildTools = (gci $androidSDK\build-tools\ | sort LastWriteTime | select -last 1).FullName
 $keystorepw = read-host "Keystore password"
 Get-ChildItem $parentFolder\apk\* -Include *unsigned.apk, *debug.apk | 
