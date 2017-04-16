@@ -184,30 +184,28 @@ If (Test-Path env:ANDROID_HOME) {
 function checkJava_Home {
 $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") 
 $env:JAVA_HOME = [System.Environment]::GetEnvironmentVariable("JAVA_HOME","Machine") 
-If (Test-Path env:JAVA_HOME) {			
-	} else {
+If (!(Test-Path env:JAVA_HOME)) {			
 	Write-Host "`r`JAVA_HOME environment variable not set. please install JDK!`r`n" -foregroundcolor red
 	anykey
 	MainMenu
-}
+	}
 }
 
 function checkGit {
 $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") 
 if (!(Get-Command git -errorAction SilentlyContinue)) {
-Write-Host "`r`nGIT not installed. please install GIT!`r`n" -foregroundcolor red
+	Write-Host "`r`nGIT not installed. please install GIT!`r`n" -foregroundcolor red
 	anykey
 	MainMenu
-}
+	}
 }
 
 function checkaapsFolder {
-If (Test-Path $aapsFolder) {			
-	} else {
+If (!(Test-Path $aapsFolder)) {			
 	Write-Host "`r`nplease clone aaps first!`r`n" -foregroundcolor red
 	anykey
 	MainMenu
-}
+	}
 }
 
 
