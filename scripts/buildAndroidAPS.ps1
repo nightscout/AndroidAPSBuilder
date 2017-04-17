@@ -236,6 +236,14 @@ If (!(Test-Path $aapsFolder)) {
 	}
 }
 
+function checkApkFolder {
+If (!(Test-Path $apkFolder)) {			
+	Write-Host "`r`nplease build aaps first!`r`n" -foregroundcolor red
+	anykey
+	MainMenu
+	}
+}
+
 function fetchRemoteRepo {
 git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder fetch remoteRepo
 cls
@@ -292,6 +300,7 @@ keytool -genkey -v -keystore $parentFolder\keystore\aaps-release-key.jks -keyalg
 }
 
 function copyDebugApk {
+checkApkFolder
 Get-ChildItem $apkFolder -Filter *debug.apk | Foreach-Object {
 		$fullname = $_.FullName
 		write-host "======================================================"
@@ -302,6 +311,7 @@ Get-ChildItem $apkFolder -Filter *debug.apk | Foreach-Object {
 }
 
 function copyApk {
+checkApkFolder
 Get-ChildItem $apkFolder -Filter *.apk | Foreach-Object {
 		$fullname = $_.FullName
 		write-host "======================================================" 
