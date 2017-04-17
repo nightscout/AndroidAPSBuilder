@@ -242,14 +242,17 @@ cls
 $currentBranch = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder status -b)[0]
 $currentBranch = $currentBranch.replace("HEAD detached at remoteRepo/","")
 $currentBranch = $currentBranch.replace("On branch ","")
-write-host "`r`n	Current Branch: $currentBranch`r`n" -foregroundcolor magenta
+$commitID = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder show --format="%h" --no-patch
+write-host "`r`n	Current Branch: $currentBranch $commitID`r`n" -foregroundcolor magenta
 $apks = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder ls-remote --heads remoteRepo).Substring(52)
+$apks2 = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder ls-remote --heads remoteRepo).Substring(0,8)
 write-host "	================================================"
 write-host "	=============== select branch =================="
 write-host "	================================================"
 $menu = @{}
 for ($i=1;$i -le $apks.count; $i++) {
-   Write-Host "	$i $($apks[$i-1])" -fore "yellow"
+   Write-Host "	[$i] " -fore "yellow" -nonewline
+   Write-Host "commitID: $($apks2[$i-1])	Branch: $($apks[$i-1]) " -fore magenta 
    $menu.Add($i,($apks[$i-1]))
    }
 write-host "	================================================"
