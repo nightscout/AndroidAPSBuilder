@@ -279,7 +279,7 @@ Start-Process "$PSHome\PowerShell.exe" -Verb RunAs -ArgumentList " -ExecutionPol
 
 function generateKey {
 checkJava_Home
-keytool -genkey -v -keystore $parentFolder\aaps-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias aaps-key
+keytool -genkey -v -keystore $parentFolder\keystore\aaps-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias aaps-key
 }
 
 function copyDebugApk {
@@ -311,15 +311,29 @@ function signAPK {
 checkJava_Home
 checkAndroid_Home
 copyApk
+write-host "copy complete" -foregroundcolor magenta
+anykey
+cls
+$ks = Get-ChildItem $parentFolder\keystore -Filter *.jks
+write-host "================================================"
+write-host "=============== select keystore ================"
+write-host "================================================"
+$menu = @{}
+for ($i=1;$i -le $ks.count; $i++) {
+   Write-Host "[$i] " -fore "yellow" -nonewline
+   Write-Host "$($ks[$i-1].Name) " -fore magenta 
+   $menu.Add($i,($ks[$i-1]).FullName)
+   }
+write-host "================================================"
+write-host ""
+[int]$ans = Read-Host 'Enter number of keystore'
+$keystore = $menu.Item($ans)
 $androidSDK = "$Env:ANDROID_HOME" 
 $buildTools = (gci $androidSDK\build-tools\ | sort LastWriteTime | select -last 1).FullName
 $keystorepw = read-host "Keystore password"
 Get-ChildItem $parentFolder\apk\* -Include *unsigned.apk, *debug.apk | 
 	Foreach-Object {
-		write-host ("=" * ($_.FullName.length + 10))
 		write-host "Signing $_" -foregroundcolor magenta
-		write-host ("=" * ($_.FullName.length + 10))
-		write-host ""
 		$basename = $_.BaseName
 		if ($_.FullName -like "*debug.apk") {
 			$signedName = $basename.Replace("debug","debug-signed")
@@ -328,17 +342,27 @@ Get-ChildItem $parentFolder\apk\* -Include *unsigned.apk, *debug.apk |
 			$signedName = $basename.Replace("unsigned","signed")
 		}
 		$zipalign = cmd /c $buildtools\zipalign.exe -p 4 $_.FullName $parentFolder\apk\$basename-aligned.apk '2>&1' | Out-String | Tee-Object -Variable zipalign
-		$signer= cmd /c $buildtools\apksigner.bat sign --verbose --ks $parentFolder\aaps-release-key.jks --ks-pass pass:$keystorepw --out $parentFolder\apk\$signedName.apk $parentFolder\apk\$basename-aligned.apk '2>&1' | Out-String | Tee-Object -Variable signer
+		$signer= cmd /c $buildtools\apksigner.bat sign --verbose --ks $keystore --ks-pass pass:$keystorepw --out $parentFolder\apk\$signedName.apk $parentFolder\apk\$basename-aligned.apk '2>&1' | Out-String | Tee-Object -Variable signer
 		if ($signer -like "*password was incorrect*") {
 		write-host "password was incorrect" -foregroundcolor red
 		anykey
 		removeApk
 		MainMenu
-		} else {
+		} elseif ($signer -like "*Unexpected parameter(s) after input APK (pass:*") {
+		write-host "password was empty or incorrect" -foregroundcolor red
+		anykey
+		removeApk
+		MainMenu
+		} elseif ($signer -like "*Signed*") {
 		$verify = cmd /c $buildtools\apksigner.bat verify -v $parentFolder\apk\$signedName.apk '2>&1' | Out-String | Tee-Object -Variable verify
-		write-host -nonewline $verify
-		write-host "Signing of $signedName.apk complete"  -foregroundcolor magenta
-		write-host ""}
+		write-host $verify -foregroundcolor magenta
+		write-host ("=" * ($_.FullName.length + 10))
+		write-host "Signing of $signedName.apk complete"  -foregroundcolor cyan
+		write-host ("=" * ($_.FullName.length + 10))
+		} else {
+		
+		}
+		
 	}
 	removeApk
 }
