@@ -28,6 +28,15 @@ $apkFolder = "$aapsFolder\app\build\outputs\apk"
 $gradlewPath = "$aapsFolder\gradlew.bat"
 $gitRepo = 'https://github.com/MilosKozak/AndroidAPS.git'
 
+if (!(Test-Path $parentFolder\apk)) {
+	new-item $parentFolder\apk -itemtype directory | out-null
+}
+if (!(Test-Path $parentFolder\keystore)) {
+	new-item $parentFolder\keystore -itemtype directory | out-null
+}
+if (!(Test-Path $parentFolder\logs)) {
+	new-item $parentFolder\logs -itemtype directory | out-null
+}
 
 ###############Menu functions########################
 function DrawMenu {
@@ -333,7 +342,7 @@ $buildTools = (gci $androidSDK\build-tools\ | sort LastWriteTime | select -last 
 $keystorepw = read-host "Keystore password"
 Get-ChildItem $parentFolder\apk\* -Include *unsigned.apk, *debug.apk | 
 	Foreach-Object {
-		write-host "Signing $_" -foregroundcolor magenta
+		write-host "Signing $_" -foregroundcolor yellow
 		$basename = $_.BaseName
 		if ($_.FullName -like "*debug.apk") {
 			$signedName = $basename.Replace("debug","debug-signed")
@@ -349,7 +358,7 @@ Get-ChildItem $parentFolder\apk\* -Include *unsigned.apk, *debug.apk |
 		removeApk
 		MainMenu
 		} elseif ($signer -like "*Unexpected parameter(s) after input APK (pass:*") {
-		write-host "password was empty or incorrect" -foregroundcolor red
+		write-host "no keystore seleccted or not found put *.jks file(s) in keystore folder or generate key" -foregroundcolor red
 		anykey
 		removeApk
 		MainMenu
@@ -359,10 +368,8 @@ Get-ChildItem $parentFolder\apk\* -Include *unsigned.apk, *debug.apk |
 		write-host ("=" * ($_.FullName.length + 10))
 		write-host "Signing of $signedName.apk complete"  -foregroundcolor cyan
 		write-host ("=" * ($_.FullName.length + 10))
-		} else {
-		
+		write-host ""
 		}
-		
 	}
 	removeApk
 }
