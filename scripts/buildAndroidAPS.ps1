@@ -253,6 +253,7 @@ $menu = @{}
 for ($i=1;$i -le $apks.count; $i++) {
    Write-Host "	[$i] " -fore "yellow" -nonewline
    Write-Host "commitID: $($apks2[$i-1])	Branch: $($apks[$i-1]) " -fore magenta 
+   write-host ""
    $menu.Add($i,($apks[$i-1]))
    }
 write-host "	================================================"
