@@ -183,6 +183,7 @@ $currentBranch = $currentBranch.replace("HEAD detached at remoteRepo/","")
 $currentBranch = $currentBranch.replace("On branch ","")
 $latest = Get-ChildItem -Path $apkFolder | Sort-Object LastAccessTime -Descending | Select-Object -First 1 
 $oldfilename = ($latest.Name).replace("app-","")
+$oldfilename = ($oldfilename).replace("-","_")
 $filename = "$currentBranch" + "_" + "$commitID" + "_" + $oldfilename
 Get-ChildItem -Path $apkFolder | Sort-Object LastAccessTime -Descending | Select-Object -First 1 | Rename-Item -NewName "$filename"
 }
