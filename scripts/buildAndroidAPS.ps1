@@ -79,7 +79,7 @@ function Menu {
 ###############Menus and submenus########################
 
 function MainMenu {
-$options = "install Required Software`r`n","Clone AAPS to $aapsFolder","Switch or update local Branch`r`n","Build","Generate key for signing","Sign APK's","Install APK`r`n","-Exit-"
+$options = "install Required Software`r`n","Clone AAPS to $aapsFolder","Switch or update local Branch`r`n","Build","Generate key for signing","Sign APK's","Install APK","copy logs to PC`r`n","-Exit-"
 	$selection = Menu $options "Build AndroidAPS"
 	Switch ($selection) {
 		"install Required Software`r`n" {cls;requiredSoftware;anykey;MainMenu}
@@ -88,7 +88,8 @@ $options = "install Required Software`r`n","Clone AAPS to $aapsFolder","Switch o
 		"Build" {cls;checkaapsFolder;buildaaps;anykey;MainMenu}
 		"Generate key for signing" {cls;generateKey;anykey;MainMenu}
 		"Sign APK's" {cls;signAPK;anykey;MainMenu}
-		"Install APK`r`n" {cls;checkAndroid_Home;.$scriptroot\ADB.ps1;anykey;MainMenu}
+		"Install APK" {cls;checkAndroid_Home;.$scriptroot\ADB.ps1;anykey;MainMenu}
+		"copy logs to PC`r`n" {cls;checkAndroid_Home;.$scriptroot\ADBcopyLogs.ps1;anykey;MainMenu}
 		"-Exit-" {Exit}
 	}
 }
