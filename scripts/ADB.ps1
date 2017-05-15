@@ -68,7 +68,8 @@ write-host "	================================================"
 $apks = Get-ChildItem $apkFolder -Filter *.apk
 $menu = @{}
 for ($i=1;$i -le $apks.count; $i++) {
-   Write-Host "	$i $($apks[$i-1].name)" -fore "yellow"
+   Write-Host "	[$i]" -nonewline -fore yellow
+   write-host " $($apks[$i-1].name)" -fore cyan
    $menu.Add($i,($apks[$i-1].FullName))
    }
 write-host "	================================================"

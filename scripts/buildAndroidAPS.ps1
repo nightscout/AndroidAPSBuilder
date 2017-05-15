@@ -196,7 +196,8 @@ $latest = Get-ChildItem -Path $apkFolder | Sort-Object LastAccessTime -Descendin
 $oldfilename = ($latest.Name).replace("app-","")
 $oldfilename = ($oldfilename).replace("-","_")
 $filename = "$currentBranch" + "_" + "$commitID" + "_" + $oldfilename
-Get-ChildItem -Path $apkFolder | Sort-Object LastAccessTime -Descending | Select-Object -First 1 | Rename-Item -NewName "$filename"
+sleep 2
+$latest | Rename-Item -NewName "$filename"
 }
 
 function checkAndroid_Home {
