@@ -94,6 +94,7 @@ if (Test-Path $aapsFolder) {
 	$currentBranch = $currentBranch.replace("HEAD detached at remoteRepo/","")
 	$currentBranch = $currentBranch.replace("On branch ","")
 	$branchDate = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder log -1 --format=%cd --date=relative
+	$branchDate = $branchDate.replace(" ago","")
 	$title = "Build AndroidAPS *`r`n* Current Local Branch: $currentBranch | Age: $branchDate"
 	} else {
 	$title = "Build AndroidAPS"
@@ -261,6 +262,7 @@ $currentBranch = $currentBranch.replace("HEAD detached at remoteRepo/","")
 $currentBranch = $currentBranch.replace("On branch ","")
 $commitID = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder show --format="%h" --no-patch
 $branchDate = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder log -1 --format=%cd --date=relative
+$branchDate = $branchDate.replace(" ago","")
 write-host "`r`n	Current Local Branch: " -nonewline
 write-host "commitID: $commitID |" -nonewline -fore cyan
 write-host " Branch: $currentBranch |" -nonewline -fore magenta
@@ -270,7 +272,7 @@ $apks = ($listRemoteBranches).Substring(52)
 $apks2 = ($listRemoteBranches).Substring(0,8)
 $remoteBranchDate = @()
 ForEach( $item in $apks ) {
-	$remoteBranchDate += git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder log "remoteRepo/$item" -1 --format=%cd --date=relative
+	$remoteBranchDate += (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder log "remoteRepo/$item" -1 --format=%cd --date=relative).replace(" ago","")
 	} 
 write-host "	================================================"
 write-host "	=========== select remote branch ==============="
