@@ -192,12 +192,11 @@ $commitID = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder show --format
 $currentBranch = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder status -b)[0]
 $currentBranch = $currentBranch.replace("HEAD detached at remoteRepo/","")
 $currentBranch = $currentBranch.replace("On branch ","")
-$latest = Get-ChildItem -Path $apkFolder | Sort-Object LastAccessTime -Descending | Select-Object -First 1 
+$latest = Get-ChildItem -Path "$apkFolder" | Sort-Object LastAccessTime -Descending | Select-Object -First 1 
 $oldfilename = ($latest.Name).replace("app-","")
 $oldfilename = ($oldfilename).replace("-","_")
 $filename = "$currentBranch" + "_" + "$commitID" + "_" + $oldfilename
-sleep 2
-$latest | Rename-Item -NewName "$filename"
+$latest | Move-Item -Destination "$apkFolder\$filename" -Force
 }
 
 function checkAndroid_Home {
