@@ -95,7 +95,8 @@ if (Test-Path $aapsFolder) {
 	$currentBranch = $currentBranch.replace("On branch ","")
 	$branchDate = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder log -1 --format=%cd --date=relative
 	$branchDate = $branchDate.replace(" ago","")
-	$title = "Build AndroidAPS *`r`n* Current Local Branch: $currentBranch | Age: $branchDate"
+	$commitID = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder show --format="%h" --no-patch
+	$title = "Build AndroidAPS *`r`n* Current Local Branch: $currentBranch | Age: $branchDate | Commit ID: $commitID"
 	} else {
 	$title = "Build AndroidAPS"
 	}
