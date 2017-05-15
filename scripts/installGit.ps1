@@ -3,7 +3,7 @@
 (get-host).ui.rawui.WindowTitle = "Install Git"
 
 $downloadFolder="$Env:USERPROFILE\Downloads"
-$url = "https://github.com/git-for-windows/git/releases/download/v2.12.0.windows.1/Git-2.12.0-64-bit.exe"
+$url = "https://github.com/git-for-windows/git/releases/download/v2.13.0.windows.1/Git-2.13.0-64-bit.exe"
 $output = "$downloadFolder\Git.exe"
 
 write-host "Downloading Git"

@@ -3,7 +3,7 @@
 (get-host).ui.rawui.WindowTitle = "Install Android Studio"
 
 $downloadFolder="$Env:USERPROFILE\Downloads"
-$url = "https://dl.google.com/dl/android/studio/install/2.3.0.8/android-studio-ide-162.3764568-windows.exe"
+$url = "https://dl.google.com/dl/android/studio/install/2.3.2.0/android-studio-bundle-162.3934792-windows.exe"
 $output = "$downloadFolder\AndroidStudio.exe"
 $start_time = Get-Date
 

@@ -3,7 +3,7 @@
 (get-host).ui.rawui.WindowTitle = "Install Android SDK"
 
 $sdkFolder="$Env:USERPROFILE\AppData\Local\Android\Sdk"
-$url = "https://dl.google.com/android/repository/sdk-tools-windows-3773319.zip"
+$url = "https://dl.google.com/android/repository/sdk-tools-windows-3859397.zip"
 $output = "$sdkFolder\AndroidSDK.zip"
 $start_time = Get-Date
 
