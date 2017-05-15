@@ -88,8 +88,19 @@ function Menu {
 ###############Menus and submenus########################
 
 function MainMenu {
+
+if (Test-Path $aapsFolder) {
+	$currentBranch = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder status -b)[0]
+	$currentBranch = $currentBranch.replace("HEAD detached at remoteRepo/","")
+	$currentBranch = $currentBranch.replace("On branch ","")
+	$branchDate = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder log -1 --format=%cd --date=relative
+	$title = "Build AndroidAPS *`r`n* Current Local Branch: $currentBranch | Age: $branchDate"
+	} else {
+	$title = "Build AndroidAPS"
+	}
+
 $options = "install Required Software`r`n","Clone AAPS to $aapsFolder","Switch or update local Branch`r`n","Build","Generate key for signing","Sign APK's","Install APK","copy logs to PC`r`n","-Exit-"
-	$selection = Menu $options "Build AndroidAPS"
+	$selection = Menu $options $title
 	Switch ($selection) {
 		"install Required Software`r`n" {cls;requiredSoftware;anykey;MainMenu}
 		"Clone AAPS to $aapsFolder" {cls;checkGit;git clone $gitRepo $aapsFolder;addRemote;anykey;MainMenu}
@@ -249,17 +260,27 @@ $currentBranch = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder status 
 $currentBranch = $currentBranch.replace("HEAD detached at remoteRepo/","")
 $currentBranch = $currentBranch.replace("On branch ","")
 $commitID = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder show --format="%h" --no-patch
-write-host "`r`n	Current Branch: $currentBranch $commitID`r`n" -foregroundcolor magenta
+$branchDate = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder log -1 --format=%cd --date=relative
+write-host "`r`n	Current Local Branch: " -nonewline
+write-host "commitID: $commitID |" -nonewline -fore cyan
+write-host " Branch: $currentBranch |" -nonewline -fore magenta
+write-host " Age: $branchDate`r`n" -foregroundcolor white
 $listRemoteBranches = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder ls-remote --heads remoteRepo
 $apks = ($listRemoteBranches).Substring(52)
 $apks2 = ($listRemoteBranches).Substring(0,8)
+$remoteBranchDate = @()
+ForEach( $item in $apks ) {
+	$remoteBranchDate += git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder log "remoteRepo/$item" -1 --format=%cd --date=relative
+	} 
 write-host "	================================================"
-write-host "	=============== select branch =================="
+write-host "	=========== select remote branch ==============="
 write-host "	================================================"
 $menu = @{}
 for ($i=1;$i -le $apks.count; $i++) {
    Write-Host "	[$i] " -fore "yellow" -nonewline
-   Write-Host "commitID: $($apks2[$i-1])	Branch: $($apks[$i-1]) " -fore magenta 
+   Write-Host "commitID: $($apks2[$i-1])" -fore cyan -nonewline 
+   Write-Host "	Branch: $($apks[$i-1])" -fore magenta -nonewline
+   Write-Host "	Age: $($remoteBranchDate[$i-1])" -fore white 
    write-host ""
    $menu.Add($i,($apks[$i-1]))
    }
