@@ -64,7 +64,7 @@ if ($serial -like "*unknown*") {
 	return
 } else {
 Write-Host "$serial"	
-write-host "	================================================"
+write-host "	======================================================================"
 $apks = Get-ChildItem $apkFolder -Filter *.apk
 $menu = @{}
 for ($i=1;$i -le $apks.count; $i++) {
@@ -72,7 +72,7 @@ for ($i=1;$i -le $apks.count; $i++) {
    write-host " $($apks[$i-1].name)" -fore cyan
    $menu.Add($i,($apks[$i-1].FullName))
    }
-write-host "	================================================"
+write-host "	======================================================================"
 write-host ""
 [int]$ans = Read-Host 'Enter number of apk which you like to install'
 $selection = $menu.Item($ans)

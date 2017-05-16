@@ -309,6 +309,15 @@ if($currentBranch -is [system.array]){
 $commitID = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder show --format="%h" --no-patch
 $branchDate = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder log -1 --format=%cd --date=relative
 $branchDate = $branchDate.replace(" ago","")
+$currentremotebranch= git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder show remoteRepo/$currentBranch --format="%h" --no-patch
+$remotebranchAge = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder log "remoteRepo/$currentBranch" -1 --format=%cd --date=relative)	
+if (!($commitID -eq $currentremotebranch)) {
+	write-host "`r`n	[UPDATE] " -nonewline -fore yellow
+	write-host "Available for: " -nonewline
+	write-host "$currentBranch " -nonewline -fore magenta
+	write-host "Branch. " -nonewline
+	write-host "Age: $remotebranchAge" -fore white
+	} 
 write-host "`r`n	Current Local Branch: " -nonewline
 write-host "commitID: $commitID |" -nonewline -fore cyan
 write-host " Branch: $currentBranch |" -nonewline -fore magenta
@@ -320,9 +329,9 @@ $remoteBranchDate = @()
 ForEach( $item in $apks ) {
 	$remoteBranchDate += (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder log "remoteRepo/$item" -1 --format=%cd --date=relative).replace(" ago","")
 	} 
-write-host "	================================================"
-write-host "	=========== select remote branch ==============="
-write-host "	================================================"
+write-host "	==========================================================="
+write-host "	=============== select remote branch ======================"
+write-host "	==========================================================="
 $menu = @{}
 for ($i=1;$i -le $apks.count; $i++) {
    Write-Host "	[$i] " -fore "yellow" -nonewline
@@ -332,7 +341,7 @@ for ($i=1;$i -le $apks.count; $i++) {
    write-host ""
    $menu.Add($i,($apks[$i-1]))
    }
-write-host "	================================================"
+write-host "	==========================================================="
 write-host ""
 [int]$ans = Read-Host 'Enter number of branch'
 $branch = $menu.Item($ans)
@@ -360,9 +369,9 @@ function copyDebugApk {
 checkApkFolder
 Get-ChildItem $apkFolder -Filter *debug.apk | Foreach-Object {
 		$fullname = $_.FullName
-		write-host "======================================================"
+		write-host "==========================================================================="
 		write-host "copy $_ to`r`n$parentFolder\apk\" -foregroundcolor yellow
-		write-host "======================================================"
+		write-host "===========================================================================`r`n"
 		Copy-Item "$fullname" -Destination (New-Item "$parentFolder\apk\" -Type container -Force) -Force
 		}
 }
@@ -371,9 +380,9 @@ function copyApk {
 checkApkFolder
 Get-ChildItem $apkFolder -Filter *.apk | Foreach-Object {
 		$fullname = $_.FullName
-		write-host "======================================================" 
+		write-host "===========================================================================" 
 		write-host "copy $_ to`r`n$parentFolder\apk\" -foregroundcolor yellow
-		write-host "======================================================`r`n"
+		write-host "===========================================================================`r`n"
 		Copy-Item "$fullname" -Destination (New-Item "$parentFolder\apk\" -Type container -Force) -Force
 		}
 }
