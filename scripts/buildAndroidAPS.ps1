@@ -147,11 +147,11 @@ $options = "Full","NSClient","Openloop","Pumpcontrol","-Main Menu-","-Exit-"
 }
 
 function buildType {
-$options = "Debug","Release","-Main Menu-","-Exit-"
+$options = "Release","Debug","-Main Menu-","-Exit-"
 	$selection = Menu $options "Select Build Type!"
 	Switch ($selection) {
-		"Debug" {$type= "Debug";assemble}
 		"Release" {$type = "Release";assemble}
+		"Debug" {$type= "Debug";assemble}
 		"-Main Menu-" {MainMenu}
 		"-Exit-" {Exit}
 	}
@@ -195,7 +195,8 @@ $currentBranch = $currentBranch.replace("On branch ","")
 $latest = Get-ChildItem -Path "$apkFolder" | Sort-Object LastAccessTime -Descending | Select-Object -First 1 
 $oldfilename = ($latest.Name).replace("app-","")
 $oldfilename = ($oldfilename).replace("-","_")
-$filename = "$currentBranch" + "_" + "$commitID" + "_" + $oldfilename
+$date = Get-Date -format "d_MMM"
+$filename = "$currentBranch" + "_" + "$commitID" + "_" + "$date" + "_" + $oldfilename
 $latest | Move-Item -Destination "$apkFolder\$filename" -Force
 }
 
