@@ -90,9 +90,20 @@ function Menu {
 function MainMenu {
 
 if (Test-Path $aapsFolder) {
-	$currentBranch = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder status -b)[0]
-	$currentBranch = $currentBranch.replace("HEAD detached at remoteRepo/","")
-	$currentBranch = $currentBranch.replace("On branch ","")
+	$currentBranch = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder reflog
+	if($currentBranch -isnot [system.array]){
+		$currentBranch = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder status -b)[0]
+		$currentBranch = $currentBranch.replace("HEAD detached at remoteRepo/","")
+		$currentBranch = $currentBranch.replace("On branch ","")
+		}
+	
+	if($currentBranch -is [system.array]){
+		$currentBranch = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder reflog)[0]
+		$currentBranch = $currentBranch.split(" ")
+		$currentBranch = $currentBranch[7]
+		$currentBranch = $currentBranch.replace("remoteRepo/","")
+		}
+
 	$branchDate = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder log -1 --format=%cd --date=relative
 	$branchDate = $branchDate.replace(" ago","")
 	$commitID = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder show --format="%h" --no-patch
@@ -189,9 +200,20 @@ $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 function renameAPK {
 #git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder branch -vv | select-string -pattern '\*'				
 $commitID = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder show --format="%h" --no-patch
-$currentBranch = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder status -b)[0]
-$currentBranch = $currentBranch.replace("HEAD detached at remoteRepo/","")
-$currentBranch = $currentBranch.replace("On branch ","")
+$currentBranch = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder reflog
+if($currentBranch -isnot [system.array]){
+	$currentBranch = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder status -b)[0]
+	$currentBranch = $currentBranch.replace("HEAD detached at remoteRepo/","")
+	$currentBranch = $currentBranch.replace("On branch ","")
+	}
+	
+if($currentBranch -is [system.array]){
+	$currentBranch = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder reflog)[0]
+	$currentBranch = $currentBranch.split(" ")
+	$currentBranch = $currentBranch[7]
+	$currentBranch = $currentBranch.replace("remoteRepo/","")
+	}
+
 $latest = Get-ChildItem -Path "$apkFolder" | Sort-Object LastAccessTime -Descending | Select-Object -First 1 
 $oldfilename = ($latest.Name).replace("app-","")
 $oldfilename = ($oldfilename).replace("-","_")
@@ -259,9 +281,21 @@ function selectRepo {
 	" -foregroundcolor magenta
 anykey
 cls
-$currentBranch = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder status -b)[0]
-$currentBranch = $currentBranch.replace("HEAD detached at remoteRepo/","")
-$currentBranch = $currentBranch.replace("On branch ","")
+
+$currentBranch = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder reflog
+if($currentBranch -isnot [system.array]){
+	$currentBranch = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder status -b)[0]
+	$currentBranch = $currentBranch.replace("HEAD detached at remoteRepo/","")
+	$currentBranch = $currentBranch.replace("On branch ","")
+	}
+	
+if($currentBranch -is [system.array]){
+	$currentBranch = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder reflog)[0]
+	$currentBranch = $currentBranch.split(" ")
+	$currentBranch = $currentBranch[7]
+	$currentBranch = $currentBranch.replace("remoteRepo/","")
+	}
+
 $commitID = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder show --format="%h" --no-patch
 $branchDate = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder log -1 --format=%cd --date=relative
 $branchDate = $branchDate.replace(" ago","")
