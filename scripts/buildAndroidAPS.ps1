@@ -94,6 +94,7 @@ function Menu {
 function MainMenu {
 
 if (Test-Path $aapsFolder) {
+	fetchRemoteRepo
 	$currentBranch = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder reflog
 	if($currentBranch -isnot [system.array]){
 		$currentBranch = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder status -b)[0]
