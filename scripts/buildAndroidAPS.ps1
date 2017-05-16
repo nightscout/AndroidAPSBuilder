@@ -46,7 +46,11 @@ function DrawMenu {
 	$bcolor = "Black"
 	$l = $menuItems.length + 1
 	cls
-	$menuwidth = $menuTitel.length + 4
+	if ($menuTitel.length -ge 30) {
+		$menuwidth = $menuTitel.length - 20
+	} else {
+		$menuwidth = $menuTitel.length + 4
+	}
 	Write-Host -NoNewLine
 	Write-Host ("*" * $menuwidth) -fore $fcolor -back $bcolor
 	Write-Host -NoNewLine
@@ -103,15 +107,21 @@ if (Test-Path $aapsFolder) {
 		$currentBranch = $currentBranch[7]
 		$currentBranch = $currentBranch.replace("remoteRepo/","")
 		}
-
+		
+	$currentremotebranch= git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder show remoteRepo/$currentBranch --format="%h" --no-patch
 	$branchDate = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder log -1 --format=%cd --date=relative
 	$branchDate = $branchDate.replace(" ago","")
 	$commitID = git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder show --format="%h" --no-patch
-	$title = "Build AndroidAPS *`r`n* Current Local Branch: $currentBranch | Age: $branchDate | Commit ID: $commitID"
+	$remotebranchAge = (git --git-dir=$aapsFolder\.git --work-tree=$aapsFolder log "remoteRepo/$currentBranch" -1 --format=%cd --date=relative)	
+	if (!($commitID -eq $currentremotebranch)) {
+			$title = "UPDATE Available for: $currentBranch Branch. Age: $remotebranchAge  *`r`n`r`n* Current Local Branch: $currentBranch | Age: $branchDate | Commit ID: $commitID"
+		} else {
+			$title = "Build AndroidAPS *`r`n`r`n* Current Local Branch: $currentBranch | Age: $branchDate | Commit ID: $commitID"
+		}
 	} else {
 	$title = "Build AndroidAPS"
 	}
-
+	
 $options = "install Required Software`r`n","Clone AAPS to $aapsFolder","Switch or update local Branch`r`n","Build","Generate key for signing","Sign APK's","Install APK","copy logs to PC`r`n","-Exit-"
 	$selection = Menu $options $title
 	Switch ($selection) {
