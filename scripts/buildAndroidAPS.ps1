@@ -375,13 +375,6 @@ Get-ChildItem $apkFolder -Filter *.apk | Foreach-Object {
 		write-host "===========================================================================`r`n"
 		Copy-Item "$fullname" -Destination (New-Item "$parentFolder\apk\" -Type container -Force) -Force
 		}
-Get-ChildItem $apkFolder -Filter *debug.apk | Foreach-Object {
-		$fullname = $_.FullName
-		write-host "==========================================================================="
-		write-host "copy $_ to`r`n$parentFolder\apk\" -foregroundcolor yellow
-		write-host "===========================================================================`r`n"
-		Copy-Item "$fullname" -Destination (New-Item "$parentFolder\apk\" -Type container -Force) -Force
-		}
 removeBuildFolders
 }
 
