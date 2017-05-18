@@ -187,17 +187,17 @@ $options = "Nowear","Wear","Wearcontrol","-Main Menu-","-Exit-"
 		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Nowear`"$type`""
 		renameAPK
 		cmd.exe /C "`"$gradlewPath`" --stop"
-		copyDebugApk}
+		copyApk}
 		"Wear" {
 		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Wear`"$type`""
 		renameAPK
 		cmd.exe /C "`"$gradlewPath`" --stop"
-		copyDebugApk}
+		copyApk}
 		"Wearcontrol" {
 		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Wearcontrol`"$type`""
 		renameAPK
 		cmd.exe /C "`"$gradlewPath`" --stop" 		
-		copyDebugApk}
+		copyApk}
 		"-Main Menu-" {MainMenu}
 		"-Exit-" {Exit}
 	}
@@ -366,17 +366,6 @@ checkJava_Home
 keytool -genkey -v -keystore $parentFolder\keystore\aaps-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias aaps-key
 }
 
-function copyDebugApk {
-checkApkFolder
-Get-ChildItem $apkFolder -Filter *debug.apk | Foreach-Object {
-		$fullname = $_.FullName
-		write-host "==========================================================================="
-		write-host "copy $_ to`r`n$parentFolder\apk\" -foregroundcolor yellow
-		write-host "===========================================================================`r`n"
-		Copy-Item "$fullname" -Destination (New-Item "$parentFolder\apk\" -Type container -Force) -Force
-		}
-}
-
 function copyApk {
 checkApkFolder
 Get-ChildItem $apkFolder -Filter *.apk | Foreach-Object {
@@ -386,6 +375,14 @@ Get-ChildItem $apkFolder -Filter *.apk | Foreach-Object {
 		write-host "===========================================================================`r`n"
 		Copy-Item "$fullname" -Destination (New-Item "$parentFolder\apk\" -Type container -Force) -Force
 		}
+Get-ChildItem $apkFolder -Filter *debug.apk | Foreach-Object {
+		$fullname = $_.FullName
+		write-host "==========================================================================="
+		write-host "copy $_ to`r`n$parentFolder\apk\" -foregroundcolor yellow
+		write-host "===========================================================================`r`n"
+		Copy-Item "$fullname" -Destination (New-Item "$parentFolder\apk\" -Type container -Force) -Force
+		}
+removeBuildFolders
 }
 
 function removeApk {
@@ -393,10 +390,17 @@ Get-ChildItem $parentFolder\apk\ -Filter *aligned.apk | Remove-Item
 Get-ChildItem $parentFolder\apk\ -Filter *unsigned.apk | Remove-Item
 }
 
+function removeBuildFolders {
+If (Test-Path $apkFolder) {			
+	& cmd.exe /c rd /S /Q "$aapsFolder\app\build\"
+	& cmd.exe /c rd /S /Q "$aapsFolder\wear\build\"
+	& cmd.exe /c rd /S /Q "$aapsFolder\build\"
+	}
+}
+
 function signAPK {
 checkJava_Home
 checkAndroid_Home
-copyApk
 write-host "copy complete" -foregroundcolor magenta
 anykey
 cls
