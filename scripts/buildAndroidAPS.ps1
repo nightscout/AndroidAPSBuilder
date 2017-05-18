@@ -401,9 +401,6 @@ If (Test-Path $apkFolder) {
 function signAPK {
 checkJava_Home
 checkAndroid_Home
-write-host "copy complete" -foregroundcolor magenta
-anykey
-cls
 $ks = Get-ChildItem $parentFolder\keystore -Filter *.jks
 write-host "================================================"
 write-host "=============== select keystore ================"
