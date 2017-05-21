@@ -65,7 +65,7 @@ if ($serial -like "*unknown*") {
 } else {
 Write-Host "$serial"	
 write-host "	======================================================================"
-$apks = Get-ChildItem $apkFolder -Filter *.apk
+$apks = Get-ChildItem $apkFolder -Filter *.apk | sort CreationTime -Descending
 $menu = @{}
 for ($i=1;$i -le $apks.count; $i++) {
    Write-Host "	[$i]" -nonewline -fore yellow
