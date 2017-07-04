@@ -3,11 +3,11 @@
 (get-host).ui.rawui.WindowTitle = "Install JDK"
 
 $downloadFolder="$Env:USERPROFILE\Downloads"
-$JDK_VER="8u121"
-$JDK_FULL_VER="8u121-b13"
-$JDK_PATH="1.8.0_121"
-$id = "e9e7ea248e2c4826b92b3f075a80e441"
-#http://download.oracle.com/otn-pub/java/jdk/8u121-b13/e9e7ea248e2c4826b92b3f075a80e441/jdk-8u121-windows-x64.exe
+$JDK_VER="8u131"
+$JDK_FULL_VER="8u131-b11"
+$JDK_PATH="1.8.0_131"
+$id = "d54c1d3a095b4ff2b6607d096fa80163"
+#http://download.oracle.com/otn-pub/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/jdk-8u131-windows-x64.exe
 $source64 = "http://download.oracle.com/otn-pub/java/jdk/$JDK_FULL_VER/$id/jdk-$JDK_VER-windows-x64.exe"
 $destination64 = "$downloadFolder\$JDK_VER-x64.exe"
 $client = new-object System.Net.WebClient
