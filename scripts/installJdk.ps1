@@ -4,7 +4,7 @@
 
 $downloadFolder="$Env:USERPROFILE\Downloads"
 $JDK_VER="8u144"
-$JDK_FULL_VER="8u131-b01"
+$JDK_FULL_VER="8u144-b01"
 $JDK_PATH="1.8.0_144"
 $id = "090f390dda5b47b9b721c7dfaa008135"
 #http://download.oracle.com/otn-pub/java/jdk/8u144-b01/090f390dda5b47b9b721c7dfaa008135/jdk-8u144-windows-x64.exe
