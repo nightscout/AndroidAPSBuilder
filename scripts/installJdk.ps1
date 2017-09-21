@@ -7,6 +7,24 @@ $JDK_VER="8u144"
 $JDK_FULL_VER="8u144-b01"
 $JDK_PATH="1.8.0_144"
 $id = "090f390dda5b47b9b721c7dfaa008135"
+
+if (test-path .\preDownloadPackage) {
+Start-Process ".\preDownloadPackage\GIT\Git-2.14.1-64-bit.exe" -ArgumentList "/VERYSILENT" -wait -nonewwindow
+try {
+    Write-Host 'Installing JDK-x64'
+    $proc1 = Start-Process -FilePath ".\preDownloadPackage\JDK\jdk-8u144-windows-x64" -ArgumentList "/s REBOOT=ReallySuppress" -Wait -PassThru
+    $proc1.waitForExit()
+    Write-Host 'Installation Done.'
+} catch [exception] {
+    write-host '$_ is' $_
+    write-host '$_.GetType().FullName is' $_.GetType().FullName
+    write-host '$_.Exception is' $_.Exception
+    write-host '$_.Exception.GetType().FullName is' $_.Exception.GetType().FullName
+    write-host '$_.Exception.Message is' $_.Exception.Message
+}
+} else { 
+
+
 #http://download.oracle.com/otn-pub/java/jdk/8u144-b01/090f390dda5b47b9b721c7dfaa008135/jdk-8u144-windows-x64.exe
 $source64 = "http://download.oracle.com/otn-pub/java/jdk/$JDK_FULL_VER/$id/jdk-$JDK_VER-windows-x64.exe"
 $destination64 = "$downloadFolder\$JDK_VER-x64.exe"
@@ -20,6 +38,7 @@ if (!(Test-Path $destination64)) {
     Write-Host "Downloading $destination64 failed"
     Exit
 }
+
  
 try {
     Write-Host 'Installing JDK-x64'
@@ -32,6 +51,7 @@ try {
     write-host '$_.Exception is' $_.Exception
     write-host '$_.Exception.GetType().FullName is' $_.Exception.GetType().FullName
     write-host '$_.Exception.Message is' $_.Exception.Message
+}
 }
  
 if ((Test-Path "c:\Program Files\Java") -Or (Test-Path "c:\Program Files\Java")) {

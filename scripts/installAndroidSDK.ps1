@@ -7,18 +7,24 @@ $url = "https://dl.google.com/android/repository/sdk-tools-windows-3859397.zip"
 $output = "$sdkFolder\AndroidSDK.zip"
 $start_time = Get-Date
 
-if (!(Test-Path $sdkFolder)) {
-	new-item $sdkFolder -itemtype directory
-}
-
 function Unzip {
     param([string]$zipfile, [string]$outpath)
 	write-host "Unzipping $zipfile"
     [System.IO.Compression.ZipFile]::ExtractToDirectory($zipfile, $outpath)
 }
 
+if (!(Test-Path $sdkFolder)) {
+	new-item $sdkFolder -itemtype directory
+}
+
+
 if (!(Test-Path $sdkFolder\tools)) {
-	Import-Module BitsTransfer
+if (test-path .\preDownloadPackage) {
+copy-item .\preDownloadPackage\AndroidSDK\* $sdkFolder -force -verbose -recurse
+
+} else { 	
+
+Import-Module BitsTransfer
 	Start-BitsTransfer -Source $url -Destination $output
 	Write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
 	Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -27,6 +33,13 @@ if (!(Test-Path $sdkFolder\tools)) {
 		Remove-Item $output
 	}
 }
+
+}
+
+
+
+
+
 
 $AndroidToolPath = "$sdkFolder\tools\bin\sdkmanager.bat"
 & $AndroidToolPath 'platform-tools' 'platforms;android-23' 'build-tools;25.0.2' 'extras;google;m2repository' 'extras;android;m2repository' 'extras;google;usb_driver' 'emulator' --verbose
