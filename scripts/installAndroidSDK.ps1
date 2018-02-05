@@ -36,11 +36,6 @@ Import-Module BitsTransfer
 
 }
 
-
-
-
-
-
 $AndroidToolPath = "$sdkFolder\tools\bin\sdkmanager.bat"
-& $AndroidToolPath 'platform-tools' 'platforms;android-23' 'build-tools;25.0.2' 'extras;google;m2repository' 'extras;android;m2repository' 'extras;google;usb_driver' 'emulator' --verbose
+& $AndroidToolPath 'platform-tools' 'platforms;android-23' 'build-tools;27.0.2' 'extras;google;m2repository' 'extras;android;m2repository' 'extras;google;usb_driver' 'emulator' --verbose
 Start-Process CMD -ArgumentList "/C setx -m ANDROID_HOME `"$sdkFolder`"" -Verb RunAs

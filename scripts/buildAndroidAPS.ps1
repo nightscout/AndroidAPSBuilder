@@ -156,13 +156,14 @@ function buildaaps {
 checkAndroid_Home
 checkJava_Home
 checkaapsFolder
-$options = "Full","NSClient","Openloop","Pumpcontrol","-Main Menu-","-Exit-"
+$options = "Full","NSClient","Openloop","Pumpcontrol","g5uploader","-Main Menu-","-Exit-"
 	$selection = Menu $options "Select Build Flavor"
 	Switch ($selection) {
 		"Full" {$flavor = "Full";buildType;anykey;MainMenu}
 		"NSClient" {$flavor = "NSClient";buildType;anykey;MainMenu}
 		"Openloop" {$flavor = "Openloop";buildType;anykey;MainMenu}
 		"Pumpcontrol" {$flavor = "Pumpcontrol";buildType;anykey;MainMenu}
+		"g5uploader" {$flavor = "g5uploader";buildType;anykey;MainMenu}
 		"-Main Menu-" {MainMenu}
 		"-Exit-" {Exit}
 	}
@@ -180,27 +181,13 @@ $options = "Release","Debug","-Main Menu-","-Exit-"
 }
 
 function assemble {
-$options = "Nowear","Wear","Wearcontrol","-Main Menu-","-Exit-"
-	$selection = Menu $options "Select Wear Options!"
-	Switch ($selection) {
-		"Nowear" {
-		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Nowear`"$type`""
-		renameAPK
-		cmd.exe /C "`"$gradlewPath`" --stop"
-		copyApk}
-		"Wear" {
-		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Wear`"$type`""
-		renameAPK
-		cmd.exe /C "`"$gradlewPath`" --stop"
-		copyApk}
-		"Wearcontrol" {
-		cmd.exe /C "`"$gradlewPath`" -p `"$aapsFolder`" assemble`"$flavor`"Wearcontrol`"$type`""
-		renameAPK
-		cmd.exe /C "`"$gradlewPath`" --stop" 		
-		copyApk}
-		"-Main Menu-" {MainMenu}
-		"-Exit-" {Exit}
-	}
+Push-Location -Path $aapsFolder
+$gradleCommand = "assemble$flavor$type"
+.\gradlew $gradleCommand
+renameAPK
+.\gradlew --stop
+copyApk
+Pop-Location
 }
 
 function anykey {
@@ -225,12 +212,18 @@ if($currentBranch -is [system.array]){
 	$currentBranch = $currentBranch.replace("remoteRepo/","")
 	}
 
-$latest = Get-ChildItem -Path "$apkFolder" | Sort-Object LastAccessTime -Descending | Select-Object -First 1 
+$latest = Get-ChildItem -Path "$apkFolder" -recurse -Filter *.apk | Sort-Object LastAccessTime -Descending | Select-Object -First 1 
 $oldfilename = ($latest.Name).replace("app-","")
 $oldfilename = ($oldfilename).replace("-","_")
 $date = Get-Date -format "d_MMM"
 $filename = "$currentBranch" + "_" + "$commitID" + "_" + "$date" + "_" + $oldfilename
 $latest | Move-Item -Destination "$apkFolder\$filename" -Force
+clear-variable latest
+clear-variable filename
+clear-variable date
+clear-variable oldfilename
+clear-variable commitID
+clear-variable currentBranch
 }
 
 function checkAndroid_Home {
@@ -368,7 +361,7 @@ keytool -genkey -v -keystore $parentFolder\keystore\aaps-release-key.jks -keyalg
 
 function copyApk {
 checkApkFolder
-Get-ChildItem $apkFolder -Filter *.apk | Foreach-Object {
+Get-ChildItem $apkFolder -Recurse -Filter *.apk | Foreach-Object {
 		$fullname = $_.FullName
 		write-host "===========================================================================" 
 		write-host "copy $_ to`r`n$parentFolder\apk\" -foregroundcolor yellow

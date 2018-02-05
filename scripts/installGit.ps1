@@ -4,12 +4,12 @@
 
 
 if (test-path .\preDownloadPackage) {
-Start-Process ".\preDownloadPackage\GIT\Git-2.14.1-64-bit.exe" -ArgumentList "/VERYSILENT" -wait -nonewwindow
+Start-Process ".\preDownloadPackage\GIT\Git-2.16.1.2-64-bit.exe" -ArgumentList "/VERYSILENT" -wait -nonewwindow
 
 } else { 
 
 $downloadFolder="$Env:USERPROFILE\Downloads"
-$url = "https://github.com/git-for-windows/git/releases/download/v2.14.1.windows.1/Git-2.14.1-64-bit.exe"
+$url = "https://github.com/git-for-windows/git/releases/download/v2.16.1.windows.2/Git-2.16.1.2-64-bit.exe"
 $output = "$downloadFolder\Git.exe"
 
 write-host "Downloading Git"
