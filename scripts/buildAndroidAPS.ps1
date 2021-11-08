@@ -26,7 +26,7 @@ $parentFolder = (get-item $scriptroot ).parent.FullName
 $aapsFolder = "$parentFolder\AndroidAPS"
 $apkFolder = "$aapsFolder\app\build\outputs\apk"
 $gradlewPath = "$aapsFolder\gradlew.bat"
-$gitRepo = 'https://github.com/MilosKozak/AndroidAPS.git'
+$gitRepo = 'https://github.com/nightscout/AndroidAPS.git'
 
 if (!(Test-Path $parentFolder\apk)) {
 	new-item $parentFolder\apk -itemtype directory | out-null
